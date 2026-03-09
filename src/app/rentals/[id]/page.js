@@ -40,11 +40,78 @@ export default function RentalReceiptPage() {
       });
   }, [id, user]);
 
+  // Poll for status changes when pending
+  useEffect(() => {
+    if (!rental || rental.status !== "pending") return;
+    const interval = setInterval(async () => {
+      const { data } = await supabase.from("rental_transactions").select("status").eq("id", id).maybeSingle();
+      if (data && data.status !== "pending") {
+        setRental((prev) => ({ ...prev, status: data.status }));
+      }
+    }, 5000); // check every 5 seconds
+    return () => clearInterval(interval);
+  }, [rental?.status, id]);
+
   if (!loaded) return <div><Header /><div className="container"><div className="centerNotice" style={{ marginTop: 24 }}>Loading...</div></div></div>;
   if (!rental) return <div><Header /><div className="container"><div className="centerNotice" style={{ marginTop: 24 }}>Rental not found.</div></div></div>;
 
   const pmLabel = { credit_card: "Credit Card", debit_card: "Debit Card", paypal: "PayPal" }[rental.payment_method] ?? rental.payment_method;
 
+  // ── PENDING STATE ──────────────────────────────────────────────────
+  if (rental.status === "pending") {
+    return (
+      <div>
+        <Header />
+        <div className="container" style={{ paddingTop: 32 }}>
+          <div style={{ maxWidth: 480, margin: "0 auto", textAlign: "center" }}>
+            <div style={{ width: 60, height: 60, borderRadius: "50%", background: "#f59e0b", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, margin: "0 auto 16px" }}>⏳</div>
+            <h1 style={{ fontSize: 24, fontWeight: 800, margin: "0 0 8px" }}>Request Sent!</h1>
+            <p style={{ color: "var(--text-muted)", marginBottom: 24 }}>
+              Your rental request for <strong>{item?.name}</strong> has been sent to the seller. This page will update automatically once they respond.
+            </p>
+            <div style={{ background: "var(--surface-muted)", border: "1px solid var(--line)", borderRadius: 12, padding: "16px 20px", marginBottom: 24, textAlign: "left" }}>
+              <p style={{ margin: "0 0 6px", fontWeight: 700, fontSize: 13 }}>Request Details</p>
+              <p style={{ margin: "0 0 4px", fontSize: 13, color: "var(--text-muted)" }}>Rental ID: <strong>{rental.id}</strong></p>
+              <p style={{ margin: "0 0 4px", fontSize: 13, color: "var(--text-muted)" }}>Item: <strong>{item?.name}</strong></p>
+              <p style={{ margin: "0 0 4px", fontSize: 13, color: "var(--text-muted)" }}>Period: <strong>{fmtDate(rental.start_date)} → {fmtDate(rental.expected_return_date)}</strong></p>
+              <p style={{ margin: 0, fontSize: 13, color: "var(--text-muted)" }}>Total: <strong>{fmtPrice(rental.total_cost)}</strong></p>
+            </div>
+            <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 20 }}>
+              Waiting for seller response... <span style={{ display: "inline-block", animation: "pulse 1.5s infinite" }}>●</span>
+            </p>
+            <div className="actions" style={{ justifyContent: "center" }}>
+              <Link href="/messages" className="btn btnGhost">Message Seller</Link>
+              <Link href="/my-rentals" className="btn btnGhost">My Rentals</Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── DENIED STATE ───────────────────────────────────────────────────
+  if (rental.status === "cancelled" || rental.status === "denied") {
+    return (
+      <div>
+        <Header />
+        <div className="container" style={{ paddingTop: 32 }}>
+          <div style={{ maxWidth: 480, margin: "0 auto", textAlign: "center" }}>
+            <div style={{ width: 60, height: 60, borderRadius: "50%", background: "#ef4444", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, margin: "0 auto 16px" }}>✕</div>
+            <h1 style={{ fontSize: 24, fontWeight: 800, margin: "0 0 8px" }}>Request Declined</h1>
+            <p style={{ color: "var(--text-muted)", marginBottom: 24 }}>
+              Unfortunately the seller declined your rental request for <strong>{item?.name}</strong>. No payment has been taken.
+            </p>
+            <div className="actions" style={{ justifyContent: "center" }}>
+              <Link href={`/items/${rental.item_id}`} className="btn btnPrimary">Back to Item</Link>
+              <Link href="/items" className="btn btnGhost">Browse More</Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── CONFIRMED/ACTIVE STATE ─────────────────────────────────────────
   return (
     <div>
       <Header />
@@ -61,16 +128,14 @@ export default function RentalReceiptPage() {
         <div className="receiptCard">
           <div className="receiptHeader">
             <p className="receiptTitle">Rental Receipt</p>
-            <p className="receiptSub">Rental confirmation has been sent to {user?.email}</p>
+            <p className="receiptSub">Rental ID: {rental.id}</p>
           </div>
           <div className="receiptBody">
-            {/* IDs */}
             <div className="receiptSection">
               <div className="receiptRow"><span className="receiptLabel">Rental ID:</span><strong className="receiptVal">{rental.id}</strong></div>
               <div className="receiptRow"><span className="receiptLabel">Date:</span><span className="receiptVal">{fmtDate(rental.created_at)}</span></div>
             </div>
 
-            {/* Item */}
             {item && (
               <div className="receiptSection">
                 <p className="receiptSectionTitle">Item</p>
@@ -79,7 +144,6 @@ export default function RentalReceiptPage() {
               </div>
             )}
 
-            {/* Rental Period */}
             <div className="receiptSection">
               <p className="receiptSectionTitle">Rental Period</p>
               <div className="receiptRow"><span className="receiptLabel">Start:</span><strong className="receiptVal">{fmtDate(rental.start_date)}</strong></div>
@@ -88,7 +152,6 @@ export default function RentalReceiptPage() {
               <div className="receiptRow"><span className="receiptLabel">Number of days:</span><span className="receiptVal">{rental.num_days} {rental.num_days === 1 ? "Day" : "Days"}</span></div>
             </div>
 
-            {/* Locations */}
             {pickupLoc && (
               <div className="receiptSection">
                 <p className="receiptSectionTitle">Pickup Location</p>
@@ -104,7 +167,6 @@ export default function RentalReceiptPage() {
               </div>
             )}
 
-            {/* Cost */}
             <div className="receiptSection">
               <p className="receiptSectionTitle">Cost Summary</p>
               <div className="costRow" style={{ padding: "4px 0" }}><span>Base Cost</span><span>{fmtPrice(rental.base_price)}</span></div>
@@ -113,13 +175,11 @@ export default function RentalReceiptPage() {
               <div className="costRowTotal"><span>Total Paid:</span><span>{fmtPrice(rental.total_cost)}</span></div>
             </div>
 
-            {/* Payment */}
             <div className="receiptSection">
               <p className="receiptSectionTitle">Payment Method</p>
               <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>{pmLabel}</p>
             </div>
 
-            {/* Important Info */}
             <div style={{ background: "var(--surface-muted)", borderRadius: 10, padding: "14px 16px", marginTop: 16 }}>
               <p style={{ margin: "0 0 8px", fontWeight: 700, fontSize: 13 }}>Important Information:</p>
               <ul style={{ margin: 0, padding: "0 0 0 18px", fontSize: 13, color: "var(--text-muted)", lineHeight: 1.8 }}>

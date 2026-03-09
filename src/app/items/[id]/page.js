@@ -58,127 +58,138 @@ export default function ItemDetailPage() {
   const [status, setStatus] = useState("available");
   const [newPhotoFile, setNewPhotoFile] = useState(null);
 
-  const isOwner = !!user && !!item && user.id === item.owner_id;
-
   useEffect(() => {
     if (!id) return;
-    let cancelled = false;
     Promise.all([
       supabase.from("items").select("*").eq("id", id).maybeSingle(),
       supabase.from("item_specifications").select("*").eq("item_id", id),
-    ]).then(async ([itemRes, specsRes]) => {
-      if (cancelled) return;
-      const itemData = itemRes.data ?? null;
-      setItem(itemData);
-      setSpecs(specsRes.data ?? []);
-      if (itemData) {
-        setName(itemData.name ?? "");
-        setDescription(itemData.description ?? "");
-        setDailyRate(String(itemData.daily_rate ?? ""));
-        setWeeklyRate(String(itemData.weekly_rate ?? ""));
-        setSemesterRate(String(itemData.semester_rate ?? ""));
-        setDepositAmount(String(itemData.deposit_amount ?? ""));
-        setStatus(itemData.status ?? "available");
-        if (itemData.location_id) {
-          const { data: loc } = await supabase.from("locations").select("*").eq("id", itemData.location_id).maybeSingle();
-          if (!cancelled) setLocation(loc);
+    ]).then(([ir, sr]) => {
+      const it = ir.data ?? null;
+      setItem(it);
+      setSpecs(sr.data ?? []);
+      if (it) {
+        setName(it.name ?? "");
+        setDescription(it.description ?? "");
+        setDailyRate(it.daily_rate ?? "");
+        setWeeklyRate(it.weekly_rate ?? "");
+        setSemesterRate(it.semester_rate ?? "");
+        setDepositAmount(it.deposit_amount ?? "");
+        setStatus(it.item_status ?? "available");
+        if (it.location_id) {
+          supabase.from("locations").select("*").eq("id", it.location_id).maybeSingle()
+            .then(({ data }) => setLocation(data));
         }
       }
       setIsLoaded(true);
     });
-    return () => { cancelled = true; };
   }, [id]);
 
-  async function saveItem(e) {
-    e.preventDefault();
-    if (!item || !isOwner) return;
-    const imgErr = validateImageFile(newPhotoFile);
-    if (imgErr) { setMessage(imgErr); return; }
+  const isOwner = user && item && user.id === item.owner_id;
+
+  async function saveEdit() {
     setBusy(true); setMessage("");
     try {
-      const prevPath = item.photo_path || "";
-      const updates = { name: name.trim(), description: description.trim(),
-        daily_rate: Number(dailyRate) || 0, weekly_rate: Number(weeklyRate) || 0,
-        semester_rate: Number(semesterRate) || 0, deposit_amount: Number(depositAmount) || 0,
-        price: Number(dailyRate) || 0, status, updated_at: new Date().toISOString() };
+      let photoUpdate = {};
       if (newPhotoFile) {
-        const up = await uploadItemImage(user.id, item.id, newPhotoFile);
-        updates.photo_url = up.photo_url; updates.photo_path = up.photo_path;
+        const err = validateImageFile(newPhotoFile);
+        if (err) { setMessage(err); setBusy(false); return; }
+        if (item.photo_path) await deleteItemImage(item.photo_path);
+        photoUpdate = await uploadItemImage(user.id, item.id, newPhotoFile);
       }
-      const { data, error } = await supabase.from("items").update(updates)
-        .eq("id", item.id).eq("owner_id", user.id).select().single();
+      const { error } = await supabase.from("items").update({
+        name, description,
+        daily_rate: Number(dailyRate) || 0,
+        weekly_rate: Number(weeklyRate) || 0,
+        semester_rate: Number(semesterRate) || 0,
+        deposit_amount: Number(depositAmount) || 0,
+        item_status: status,
+        ...photoUpdate,
+      }).eq("id", item.id);
       if (error) throw error;
-      if (newPhotoFile && prevPath && prevPath !== updates.photo_path) {
-        try { await deleteItemImage(prevPath); } catch {}
-      }
-      setItem(data); setNewPhotoFile(null); setMessage("Item updated."); setEditMode(false);
-    } catch (err) { setMessage(err instanceof Error ? err.message : "Failed to update."); }
-    finally { setBusy(false); }
+      setItem((prev) => ({ ...prev, name, description, daily_rate: dailyRate, weekly_rate: weeklyRate, semester_rate: semesterRate, deposit_amount: depositAmount, item_status: status, ...photoUpdate }));
+      setEditMode(false);
+      setNewPhotoFile(null);
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : "Failed to save.");
+    }
+    setBusy(false);
   }
 
   async function deleteItem() {
-    if (!item || !isOwner) return;
     if (!window.confirm("Delete this item?")) return;
-    setBusy(true);
+    setBusy(true); setMessage("");
     try {
-      if (item.photo_path) { try { await deleteItemImage(item.photo_path); } catch {} }
-      const { error } = await supabase.from("items").delete().eq("id", item.id).eq("owner_id", user.id);
+      // First delete any rental_transactions referencing this item
+      const { error: rtError } = await supabase.from("rental_transactions").delete().eq("item_id", item.id);
+      if (rtError) throw rtError;
+      const { error } = await supabase.from("items").delete().eq("id", item.id);
       if (error) throw error;
+      if (item.photo_path) await deleteItemImage(item.photo_path);
       router.push("/my-items");
-    } catch (err) { setMessage(err instanceof Error ? err.message : "Failed to delete."); setBusy(false); }
+    } catch (err) {
+      console.error("Delete error:", err);
+      const msg = err?.message || err?.details || err?.hint || JSON.stringify(err);
+      setMessage("Delete failed: " + msg);
+      setBusy(false);
+    }
   }
 
-  function contactOwner() {
+  function handleMessageSeller() {
     if (!user) { router.push("/login"); return; }
-    if (isOwner) { setMessage("This is your item."); return; }
     router.push(`/messages?u=${item.owner_id}`);
   }
 
   if (!isLoaded) return <div><Header /><div className="container"><div className="centerNotice" style={{ marginTop: 24 }}>Loading...</div></div></div>;
   if (!item) return <div><Header /><div className="container"><div className="centerNotice" style={{ marginTop: 24 }}>Item not found.</div></div></div>;
 
-  const condKey = item.condition ?? "good";
-
   return (
     <div>
       <Header />
       <div className="container" style={{ paddingTop: 24 }}>
-        <Link href="/items" style={{ fontSize: 13, color: "var(--text-muted)" }}>← Back</Link>
+        <Link href="/items" style={{ fontSize: 13, color: "var(--text-muted)" }}>← Back to Browse</Link>
 
-        <div className="detailLayout" style={{ marginTop: 20, gridTemplateColumns: "340px 1fr" }}>
-          {/* Left: Gallery */}
-          <div className="detailGallery">
+        <div className="detailLayout" style={{ marginTop: 20 }}>
+          {/* Left: Image */}
+          <div style={{ position: "sticky", top: 80 }}>
             {item.photo_url
-              ? <img className="detailMainImg" src={item.photo_url} alt={item.name} style={{ aspectRatio: "3/4", maxHeight: 400 }} />
-              : <div className="detailMainImgPlaceholder" style={{ height: 260 }}><span style={{ fontSize: 13 }}>No image</span></div>}
+              ? <img src={item.photo_url} alt={item.name} className="detailMainImg" />
+              : <div className="detailMainImg" style={{ background: "#f1f5f9", display: "flex", alignItems: "center", justifyContent: "center", color: "#94a3b8", fontSize: 14 }}>No image</div>
+            }
+            {isOwner && editMode && (
+              <div className="field" style={{ marginTop: 12 }}>
+                <label className="label">Replace Photo</label>
+                <input type="file" accept="image/*" onChange={(e) => setNewPhotoFile(e.target.files?.[0] ?? null)} />
+              </div>
+            )}
           </div>
 
-          {/* Right: Info panel */}
-          <div className="detailPanel">
-            <p className="detailCategory">{item.category_id ?? "Item"}</p>
-            <h1 className="detailTitle">{item.name}</h1>
-
-            <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 12 }}>
-              <span className={`badge ${CONDITION_COLORS[condKey] ?? "badgeGray"}`}>
-                {CONDITION_LABELS[condKey] ?? condKey}
-              </span>
-              {item.item_status && (
-                <span className={`badge ${item.item_status === "available" ? "badgeGreen" : "badgeGray"}`}>
-                  {item.item_status}
-                </span>
-              )}
+          {/* Right: Info */}
+          <div>
+            {/* Category + Title */}
+            <div style={{ marginBottom: 16 }}>
+              {item.category_id && <p style={{ margin: "0 0 6px", fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--text-muted)" }}>{item.category_id}</p>}
+              {editMode
+                ? <input value={name} onChange={(e) => setName(e.target.value)} style={{ fontSize: 24, fontWeight: 800, border: "1px solid var(--line)", borderRadius: 8, padding: "6px 10px", width: "100%" }} />
+                : <h1 style={{ fontSize: 26, fontWeight: 800, margin: 0, lineHeight: 1.2 }}>{item.name}</h1>
+              }
+              <div style={{ display: "flex", gap: 8, marginTop: 10, flexWrap: "wrap", alignItems: "center" }}>
+                {item.condition && <span className={`badge ${CONDITION_COLORS[item.condition] ?? "badgeGray"}`}>{CONDITION_LABELS[item.condition] ?? item.condition}</span>}
+                {item.item_status === "rented" && <span className="badge badgeRed">Rented</span>}
+                {item.item_status === "available" && <span className="badge badgeGreen">Available</span>}
+                {item.available_quantity > 0 && <span style={{ fontSize: 12, color: "var(--text-muted)" }}>{item.available_quantity} available</span>}
+              </div>
             </div>
 
-            {/* Specs table */}
+            {/* Specs */}
             {specs.length > 0 && (
               <div className="detailSection">
                 <p className="detailSectionTitle">Specifications</p>
-                <table className="specTable">
+                <table className="specsTable">
                   <tbody>
                     {specs.map((s) => (
                       <tr key={s.id}>
-                        <td>{s.attribute_name}</td>
-                        <td>{s.attribute_value}</td>
+                        <td style={{ padding: "4px 12px 4px 0", fontSize: 13, color: "var(--text-muted)", whiteSpace: "nowrap" }}>{s.spec_name}</td>
+                        <td style={{ padding: "4px 0", fontSize: 13, fontWeight: 500 }}>{s.spec_value}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -190,8 +201,8 @@ export default function ItemDetailPage() {
             {location && (
               <div className="detailSection">
                 <p className="detailSectionTitle">Location</p>
-                <p style={{ fontSize: 14, margin: 0, fontWeight: 600 }}>{location.name}</p>
-                <p className="meta">{location.building}</p>
+                <p style={{ margin: 0, fontSize: 14 }}>{location.name}</p>
+                {location.building && <p style={{ margin: "2px 0 0", fontSize: 13, color: "var(--text-muted)" }}>{location.building} — {location.hours}</p>}
               </div>
             )}
 
@@ -202,103 +213,111 @@ export default function ItemDetailPage() {
                 <div className="sellerAvatar">
                   {(item.owner_name || item.owner_email || "U")[0].toUpperCase()}
                 </div>
-                <div>
+                <div style={{ flex: 1 }}>
                   <p className="sellerName">{item.owner_name || item.owner_email}</p>
                   <p className="sellerRating">
                     <Stars rating={item.owner_rating ?? 0} /> {item.owner_rating ? `${item.owner_rating}/5` : "No ratings yet"}
                   </p>
                 </div>
+                {/* Message Seller button — only show if logged in and not the owner */}
+                {user && !isOwner && (
+                  <button onClick={handleMessageSeller} className="btn btnGhost btnSm" style={{ flexShrink: 0 }}>
+                    💬 Message
+                  </button>
+                )}
               </div>
             </div>
 
             {/* Pricing */}
             <div className="detailSection">
               <p className="detailSectionTitle">Pricing</p>
-              <div className="priceGrid">
-                {[
-                  { label: "Daily", val: item.daily_rate },
-                  { label: "Weekly", val: item.weekly_rate },
-                  { label: "Semester", val: item.semester_rate },
-                  { label: "Deposit", val: item.deposit_amount },
-                ].filter(({ val }) => Number(val) > 0).map(({ label, val }) => (
-                  <div className="priceBox" key={label}>
-                    <p className="priceBoxLabel">{label}</p>
-                    <p className="priceBoxValue">{fmtPrice(val)}</p>
-                  </div>
-                ))}
-                {/* Fallback for old items using only price */}
-                {!item.daily_rate && Number(item.price) > 0 && (
-                  <div className="priceBox">
-                    <p className="priceBoxLabel">Price</p>
-                    <p className="priceBoxValue">{fmtPrice(item.price)}</p>
-                  </div>
-                )}
-              </div>
+              {editMode ? (
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  {[["Daily Rate", dailyRate, setDailyRate], ["Weekly Rate", weeklyRate, setWeeklyRate], ["Semester Rate", semesterRate, setSemesterRate], ["Deposit", depositAmount, setDepositAmount]].map(([lbl, val, fn]) => (
+                    <div className="field" key={lbl}>
+                      <label className="label">{lbl}</label>
+                      <input type="number" min="0" step="0.01" value={val} onChange={(e) => fn(e.target.value)} />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="priceGrid">
+                  {[
+                    { label: "Daily", val: item.daily_rate },
+                    { label: "Weekly", val: item.weekly_rate },
+                    { label: "Semester", val: item.semester_rate },
+                    { label: "Deposit", val: item.deposit_amount },
+                  ].filter(({ val }) => Number(val) > 0).map(({ label, val }) => (
+                    <div className="priceBox" key={label}>
+                      <p className="priceBoxLabel">{label}</p>
+                      <p className="priceBoxValue">{fmtPrice(val)}</p>
+                    </div>
+                  ))}
+                  {!item.daily_rate && Number(item.price) > 0 && (
+                    <div className="priceBox">
+                      <p className="priceBoxLabel">Price</p>
+                      <p className="priceBoxValue">{fmtPrice(item.price)}</p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Description */}
-            {item.description && (
+            <div className="detailSection">
+              <p className="detailSectionTitle">Description</p>
+              {editMode
+                ? <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={4} style={{ width: "100%", fontSize: 14 }} />
+                : <p style={{ margin: 0, fontSize: 14, lineHeight: 1.7, color: "var(--text-muted)" }}>{item.description || "No description provided."}</p>
+              }
+            </div>
+
+            {/* Edit: status */}
+            {editMode && (
               <div className="detailSection">
-                <p className="detailSectionTitle">Description</p>
-                <p style={{ margin: 0, fontSize: 14, lineHeight: 1.7, color: "var(--text-muted)" }}>{item.description}</p>
+                <div className="field">
+                  <label className="label">Availability Status</label>
+                  <select value={status} onChange={(e) => setStatus(e.target.value)}>
+                    <option value="available">Available</option>
+                    <option value="rented">Rented</option>
+                    <option value="maintenance">Maintenance</option>
+                  </select>
+                </div>
               </div>
             )}
 
             {/* Actions */}
+            {message && <p className="messageText errorText" style={{ marginTop: 8 }}>{message}</p>}
+
             {!isOwner ? (
               <div className="actions" style={{ marginTop: 20 }}>
-                <Link href={`/items/${item.id}/rent`} className="btn btnPrimary btnLg" style={{ flex: 1, justifyContent: "center" }}>
-                  Request to Rent
+                <Link
+                  href={item.item_status === "available" ? `/items/${item.id}/rent` : "#"}
+                  className={`btn btnPrimary btnLg${item.item_status !== "available" ? " disabled" : ""}`}
+                  style={{ flex: 1, justifyContent: "center", opacity: item.item_status !== "available" ? 0.5 : 1, pointerEvents: item.item_status !== "available" ? "none" : "auto" }}
+                >
+                  {item.item_status === "available" ? "Request to Rent" : "Currently Unavailable"}
                 </Link>
               </div>
             ) : (
               <div className="actions" style={{ marginTop: 20 }}>
-                <button className="btn btnGhost" onClick={() => setEditMode(!editMode)}>
-                  {editMode ? "Cancel" : "Edit Item"}
-                </button>
-                <button className="btn btnDanger" onClick={deleteItem} disabled={busy}>Delete</button>
+                {editMode ? (
+                  <>
+                    <button className="btn btnPrimary" onClick={saveEdit} disabled={busy}>
+                      {busy ? "Saving..." : "Save Changes"}
+                    </button>
+                    <button className="btn btnGhost" onClick={() => { setEditMode(false); setNewPhotoFile(null); }}>Cancel</button>
+                  </>
+                ) : (
+                  <>
+                    <button className="btn btnGhost" onClick={() => setEditMode(true)}>Edit Item</button>
+                    <button className="btn btnDanger" onClick={deleteItem} disabled={busy}>Delete</button>
+                  </>
+                )}
               </div>
-            )}
-
-            {message && (
-              <p className={`messageText ${message.includes("fail") || message.includes("not") ? "errorText" : "successText"}`}>
-                {message}
-              </p>
-            )}
-
-            {/* Edit form */}
-            {isOwner && editMode && (
-              <form className="formCard" onSubmit={saveItem} style={{ marginTop: 20 }}>
-                <h3 style={{ margin: "0 0 16px" }}>Edit Item</h3>
-                <div className="field"><label className="label">Title</label>
-                  <input value={name} onChange={(e) => setName(e.target.value)} required /></div>
-                <div className="field"><label className="label">Description</label>
-                  <textarea value={description} onChange={(e) => setDescription(e.target.value)} /></div>
-                <div className="field"><label className="label">Replace Photo</label>
-                  <input type="file" accept="image/*" onChange={(e) => setNewPhotoFile(e.target.files?.[0] ?? null)} /></div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                  <div className="field"><label className="label">Daily Rate ($)</label>
-                    <input type="number" min="0" step="0.01" value={dailyRate} onChange={(e) => setDailyRate(e.target.value)} /></div>
-                  <div className="field"><label className="label">Weekly Rate ($)</label>
-                    <input type="number" min="0" step="0.01" value={weeklyRate} onChange={(e) => setWeeklyRate(e.target.value)} /></div>
-                  <div className="field"><label className="label">Semester Rate ($)</label>
-                    <input type="number" min="0" step="0.01" value={semesterRate} onChange={(e) => setSemesterRate(e.target.value)} /></div>
-                  <div className="field"><label className="label">Deposit ($)</label>
-                    <input type="number" min="0" step="0.01" value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} /></div>
-                </div>
-                <div className="field"><label className="label">Status</label>
-                  <select value={status} onChange={(e) => setStatus(e.target.value)}>
-                    <option value="available">Available</option>
-                    <option value="unavailable">Unavailable</option>
-                  </select></div>
-                <div className="actions">
-                  <button type="submit" className="btn btnPrimary" disabled={busy}>{busy ? "Saving..." : "Save Changes"}</button>
-                </div>
-              </form>
             )}
           </div>
         </div>
-
       </div>
     </div>
   );

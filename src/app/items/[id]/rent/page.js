@@ -77,15 +77,18 @@ export default function RentPage() {
         start_date: startDate, expected_return_date: returnDate,
         rental_type: rentalType, num_days: days, base_price: basePrice,
         deposit_amount: deposit, location_change_fee: locationFee,
-        total_cost: total, payment_method: payMethod, status: "active",
+        total_cost: total, payment_method: payMethod,
+        status: "pending", // ← pending until seller approves
       });
       if (error) throw error;
-      // Update item availability
-      const avail = (item.available_quantity || 1) - 1;
-      await supabase.from("items").update({
-        available_quantity: avail,
-        item_status: avail <= 0 ? "rented" : "available",
-      }).eq("id", item.id);
+
+      // Send an automatic message to the seller notifying them of the request
+      await supabase.from("messages").insert({
+        sender_id: user.id,
+        recipient_id: item.owner_id,
+        body: `📦 Rental request for "${item.name}" (ID: ${rentalId}) from ${startDate} to ${returnDate}. Please go to My Listed Items → Rental Requests to approve or decline.`,
+      });
+
       router.push(`/rentals/${rentalId}`);
     } catch (err) {
       setMessage(err instanceof Error ? err.message : "Failed to submit.");
@@ -141,10 +144,10 @@ export default function RentPage() {
                     </div>
                     <div className="field">
                       <label className="label">Rental Type</label>
-                      <div style={{ display: "flex", gap: 16 }}>
+                      <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
                         {["daily","weekly","monthly","semester"].map((t) => (
-                          <label key={t} style={{ display: "flex", alignItems: "center", gap: 4, cursor: "pointer", fontSize: 13 }}>
-                            <input type="radio" name="type" value={t} checked={rentalType === t} onChange={() => setRentalType(t)} />
+                          <label key={t} style={{ display: "inline-flex", alignItems: "center", gap: 6, cursor: "pointer", fontSize: 13, fontWeight: 500, whiteSpace: "nowrap" }}>
+                            <input type="radio" name="type" value={t} checked={rentalType === t} onChange={() => setRentalType(t)} style={{ width: 16, height: 16, margin: 0, padding: 0, flexShrink: 0 }} />
                             {t.charAt(0).toUpperCase() + t.slice(1)}
                           </label>
                         ))}
@@ -182,13 +185,12 @@ export default function RentPage() {
                     <div className="costRowTotal"><span>Total</span><span>{fmtPrice(total)}</span></div>
                   </div>
 
-                  {/* Payment */}
                   <div className="rentFormSection">
                     <p className="rentFormSectionTitle">Payment Method</p>
-                    <div style={{ display: "flex", gap: 16 }}>
+                    <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
                       {[["credit_card","Credit Card"],["debit_card","Debit Card"],["paypal","PayPal"]].map(([v, l]) => (
-                        <label key={v} style={{ display: "flex", alignItems: "center", gap: 4, cursor: "pointer", fontSize: 13 }}>
-                          <input type="radio" name="pay" value={v} checked={payMethod === v} onChange={() => setPayMethod(v)} />
+                        <label key={v} style={{ display: "inline-flex", alignItems: "center", gap: 6, cursor: "pointer", fontSize: 13, fontWeight: 500, whiteSpace: "nowrap" }}>
+                          <input type="radio" name="pay" value={v} checked={payMethod === v} onChange={() => setPayMethod(v)} style={{ width: 16, height: 16, margin: 0, padding: 0, flexShrink: 0 }} />
                           {l}
                         </label>
                       ))}

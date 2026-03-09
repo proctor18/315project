@@ -38,6 +38,7 @@ export default function Header() {
             <>
               <Link href="/my-rentals" className={nc("/my-rentals")}>Rentals</Link>
               <Link href="/my-items" className={nc("/my-items")}>Listed</Link>
+              <Link href="/messages" className={nc("/messages")}>Messages</Link>
               {isAdmin && (
                 <Link href="/admin" className={nc("/admin")} style={{ marginLeft: 4, color: "rgba(255,255,255,0.6)", fontSize: 12 }}>Admin</Link>
               )}
