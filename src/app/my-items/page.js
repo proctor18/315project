@@ -10,10 +10,11 @@ import { supabase } from "@/lib/supabaseClient";
 
 const SIDEBAR_LINKS = [
   { href: "/profile", label: "Account Main" },
-  { href: "/profile/payment", label: "Payment Methods" },
+  { href: "/payment-methods", label: "Payment Methods" },
   { href: "/my-items", label: "My Listed Items" },
   { href: "/my-rentals", label: "My Rentals" },
 ];
+
 
 function fmtDate(s) {
   if (!s) return "—";

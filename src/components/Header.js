@@ -42,7 +42,7 @@ export default function Header() {
               {isAdmin && (
                 <Link href="/admin" className={nc("/admin")} style={{ marginLeft: 4, color: "rgba(255,255,255,0.6)", fontSize: 12 }}>Admin</Link>
               )}
-              <Link href="/profile" className={nc("/profile")} style={{
+              <Link href="/profile" className={nc("/profile")} style={{ //put style in css  
                 marginLeft: 8,
                 background: "rgba(255,255,255,0.12)",
                 border: "1px solid rgba(255,255,255,0.22)",
@@ -52,7 +52,7 @@ export default function Header() {
               }}>Account</Link>
             </>
           ) : (
-            <Link href="/login" style={{
+            <Link href="/login" style={{ //put style in css  
               marginLeft: 8,
               background: "#fff",
               color: "#000",

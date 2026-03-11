@@ -21,10 +21,11 @@ function isOverdue(r) { return r.status === "active" && new Date(r.expected_retu
 
 const SIDEBAR_LINKS = [
   { href: "/profile", label: "Account Main" },
-  { href: "/profile/payment", label: "Payment Methods" },
+  { href: "/payment-methods", label: "Payment Methods" },
   { href: "/my-items", label: "My Listed Items" },
   { href: "/my-rentals", label: "My Rentals" },
 ];
+
 
 export default function MyRentalsPage() {
   const { user, loading } = useAuth();
