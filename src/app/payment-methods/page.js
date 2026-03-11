@@ -117,11 +117,6 @@ export default function PaymentMethods() {
                 return;
             }
 
-            console.log("Auth user id:", user?.id);
-            console.log("Insert payload:", {
-                user_id: user?.id,
-                card_type: formData.cardType
-            });
             // Add new card
             const { data, error } = await supabase
                 .from("payment_methods")
@@ -156,7 +151,14 @@ export default function PaymentMethods() {
     };
     // Edit card button handler
     const handleEdit = (index) => {
-        setFormData(cards[index]);
+        const card = cards[index];
+        setFormData({
+            cardType: card.card_type,
+            cardNumber: card.card_number,
+            cardName: card.card_name,
+            expiry: card.expiry,
+            cvv: card.cvv,
+        });
         setEditingIndex(index);
         setShowForm(true);
     };
@@ -186,6 +188,13 @@ export default function PaymentMethods() {
         const now = new Date();
         return expiryDate < new Date(now.getFullYear(), now.getMonth(), 1);
     };
+    // Helper function to mask card numbers
+    const maskCardNumber = (number) => {
+        if (!number) return "";
+        const last4 = number.slice(-4);
+        return "**** **** **** " + last4;
+    };
+
 
     return (
         <div>
@@ -311,12 +320,12 @@ export default function PaymentMethods() {
                         {cards.length === 0 && <p>No cards added yet.</p>}
                         {cards.map((card, index) => (
                             <div key={index} className="card">
+                                
                                 <p>
-                                    <strong>{card.cardType}</strong> - {card.cardNumber}{" "}
+                                    <strong>{card.card_type}</strong> <br></br>{maskCardNumber(card.card_number)}{" "}
                                     {isExpired(card.expiry) && (
                                         <span className="badge badgeRed">Expired</span>
                                     )}
-
                                 </p>
                                 <p>{card.cardName}</p>
                                 <p>Expires: {card.expiry}</p>
@@ -333,10 +342,11 @@ export default function PaymentMethods() {
                                     >
                                         Delete
                                     </button>
-
                                 </div>
                             </div>
                         ))}
+
+
                     </div>
                 </div>
             </div>
