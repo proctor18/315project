@@ -25,6 +25,7 @@ export default function RentPage() {
 
   const [item, setItem] = useState(null);
   const [locations, setLocations] = useState([]);
+  const [savedCards, setSavedCards] = useState([]);   // ← saved payment methods
   const [loaded, setLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -35,21 +36,29 @@ export default function RentPage() {
   const [rentalType, setRentalType] = useState("daily");
   const [pickupLoc, setPickupLoc] = useState("");
   const [returnLoc, setReturnLoc] = useState("");
-  const [payMethod, setPayMethod] = useState("credit_card");
+  const [selectedCardId, setSelectedCardId] = useState(""); // ← selected payment_method_id
 
   useEffect(() => {
-    if (!id) return;
+    if (!id || !user) return;
     Promise.all([
       supabase.from("items").select("*").eq("id", id).maybeSingle(),
       supabase.from("locations").select("*").eq("status", "active"),
-    ]).then(([ir, lr]) => {
+      supabase.from("payment_methods").select("*").eq("user_id", user.id), // ← fetch saved cards
+    ]).then(([ir, lr, pr]) => {
       setItem(ir.data ?? null);
       const locs = lr.data ?? [];
       setLocations(locs);
-      if (ir.data?.location_id) { setPickupLoc(ir.data.location_id); setReturnLoc(ir.data.location_id); }
+      if (ir.data?.location_id) {
+        setPickupLoc(ir.data.location_id);
+        setReturnLoc(ir.data.location_id);
+      }
+      const cards = pr.data ?? [];
+      setSavedCards(cards);
+      // Auto-select first card if available
+      if (cards.length > 0) setSelectedCardId(cards[0].id);
       setLoaded(true);
     });
-  }, [id]);
+  }, [id, user]);
 
   const days = getDays(startDate, returnDate);
   let basePrice = 0;
@@ -68,21 +77,32 @@ export default function RentPage() {
     if (!returnDate || new Date(returnDate) <= new Date(startDate)) {
       setMessage("Return date must be after start date."); return;
     }
+    if (!selectedCardId) {
+      setMessage("Please select a payment method. You can add one in Payment Methods."); return;
+    }
     setSaving(true); setMessage("");
     try {
       const rentalId = genId();
       const { error } = await supabase.from("rental_transactions").insert({
-        id: rentalId, renter_id: user.id, item_id: item.id,
-        pickup_location_id: pickupLoc, return_location_id: returnLoc || pickupLoc,
-        start_date: startDate, expected_return_date: returnDate,
-        rental_type: rentalType, num_days: days, base_price: basePrice,
-        deposit_amount: deposit, location_change_fee: locationFee,
-        total_cost: total, payment_method: payMethod,
-        status: "pending", // ← pending until seller approves
+        id: rentalId,
+        renter_id: user.id,
+        item_id: item.id,
+        pickup_location_id: pickupLoc,
+        return_location_id: returnLoc || pickupLoc,
+        start_date: startDate,
+        expected_return_date: returnDate,
+        rental_type: rentalType,
+        num_days: days,
+        base_price: basePrice,
+        deposit_amount: deposit,
+        location_change_fee: locationFee,
+        total_cost: total,
+        payment_method_id: selectedCardId, // ← FK to payment_methods
+        status: "pending",
       });
       if (error) throw error;
 
-      // Send an automatic message to the seller notifying them of the request
+      // Notify seller
       await supabase.from("messages").insert({
         sender_id: user.id,
         recipient_id: item.owner_id,
@@ -106,7 +126,7 @@ export default function RentPage() {
         <Link href={`/items/${id}`} style={{ fontSize: 13, color: "var(--text-muted)" }}>← Back to item</Link>
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 440px", gap: 24, marginTop: 20, alignItems: "start" }}>
-          {/* Item Summary */}
+          {/* Item Image */}
           <div>
             {item.photo_url
               ? <img src={item.photo_url} alt={item.name} style={{ width: "100%", borderRadius: 14, border: "1px solid var(--line)", aspectRatio: "4/3", objectFit: "cover" }} />
@@ -121,12 +141,11 @@ export default function RentPage() {
                 {/* Item summary */}
                 <div style={{ marginBottom: 20 }}>
                   <p style={{ margin: "0 0 4px", fontWeight: 700, fontSize: 15 }}>{item.name}</p>
-                  <p className="meta">Condition: {item.condition?.replace("_"," ") ?? "—"}</p>
+                  <p className="meta">Condition: {item.condition?.replace("_", " ") ?? "—"}</p>
                   <p className="meta">Seller: {item.owner_name || item.owner_email}</p>
                 </div>
 
                 <form onSubmit={handleSubmit}>
-                  {/* Required fields notice */}
                   <p style={{ fontSize: 12, color: "var(--danger)", margin: "0 0 14px" }}>Required fields must be filled out</p>
 
                   {/* Rental Period */}
@@ -145,7 +164,7 @@ export default function RentPage() {
                     <div className="field">
                       <label className="label">Rental Type</label>
                       <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
-                        {["daily","weekly","monthly","semester"].map((t) => (
+                        {["daily", "weekly", "monthly", "semester"].map((t) => (
                           <label key={t} style={{ display: "inline-flex", alignItems: "center", gap: 6, cursor: "pointer", fontSize: 13, fontWeight: 500, whiteSpace: "nowrap" }}>
                             <input type="radio" name="type" value={t} checked={rentalType === t} onChange={() => setRentalType(t)} style={{ width: 16, height: 16, margin: 0, padding: 0, flexShrink: 0 }} />
                             {t.charAt(0).toUpperCase() + t.slice(1)}
@@ -179,30 +198,57 @@ export default function RentPage() {
                   {/* Cost Breakdown */}
                   <div className="rentFormSection">
                     <p className="rentFormSectionTitle">Cost Breakdown</p>
-                    <div className="costRow"><span>Base Cost ({rentalType}{rentalType==="daily"?` × ${days}d`:""})</span><span>{fmtPrice(basePrice)}</span></div>
+                    <div className="costRow"><span>Base Cost ({rentalType}{rentalType === "daily" ? ` × ${days}d` : ""})</span><span>{fmtPrice(basePrice)}</span></div>
                     <div className="costRow"><span>Deposit (Refundable)</span><span>{fmtPrice(deposit)}</span></div>
                     <div className="costRow"><span>Location Change Fee</span><span>{fmtPrice(locationFee)}</span></div>
                     <div className="costRowTotal"><span>Total</span><span>{fmtPrice(total)}</span></div>
                   </div>
 
+                  {/* Payment Method — saved cards */}
                   <div className="rentFormSection">
                     <p className="rentFormSectionTitle">Payment Method</p>
-                    <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
-                      {[["credit_card","Credit Card"],["debit_card","Debit Card"],["paypal","PayPal"]].map(([v, l]) => (
-                        <label key={v} style={{ display: "inline-flex", alignItems: "center", gap: 6, cursor: "pointer", fontSize: 13, fontWeight: 500, whiteSpace: "nowrap" }}>
-                          <input type="radio" name="pay" value={v} checked={payMethod === v} onChange={() => setPayMethod(v)} style={{ width: 16, height: 16, margin: 0, padding: 0, flexShrink: 0 }} />
-                          {l}
-                        </label>
-                      ))}
-                    </div>
+                    {savedCards.length === 0 ? (
+                      <p className="meta" style={{ color: "var(--danger)" }}>
+                        No saved cards. <Link href="/payment-methods">Add a payment method</Link> before renting.
+                      </p>
+                    ) : (
+                      <>
+                        {savedCards.map((card) => (
+                          <label key={card.id} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10, cursor: "pointer", padding: "10px 12px", border: `1px solid ${selectedCardId === card.id ? "var(--primary, #000)" : "var(--line, #e2e8f0)"}`, borderRadius: 8, fontSize: 13 }}>
+                            <input
+                              type="radio"
+                              name="paymentCard"
+                              value={card.id}
+                              checked={selectedCardId === card.id}
+                              onChange={() => setSelectedCardId(card.id)}
+                              style={{ width: 16, height: 16, margin: 0, flexShrink: 0 }}
+                            />
+                            <span>
+                              <strong>{card.card_type}</strong> ending in {card.card_number?.slice(-4)}
+                              <span style={{ color: "var(--text-muted)", marginLeft: 8 }}>Exp: {card.expiry}</span>
+                            </span>
+                          </label>
+                        ))}
+                        <Link href="/payment-methods" style={{ fontSize: 12, color: "var(--text-muted)" }}>
+                          + Manage payment methods
+                        </Link>
+                      </>
+                    )}
                   </div>
 
-                  <button type="submit" className="btn btnPrimary" style={{ width: "100%" }} disabled={saving || !user}>
+                  <button
+                    type="submit"
+                    className="btn btnPrimary"
+                    style={{ width: "100%" }}
+                    disabled={saving || !user || savedCards.length === 0}
+                  >
                     {saving ? "Processing..." : "Request to Rent"}
                   </button>
-                  {!user && <p className="meta" style={{ color: "var(--danger)", marginTop: 8, textAlign: "center" }}>
-                    Please <Link href="/login">log in</Link> to rent.
-                  </p>}
+                  {!user && (
+                    <p className="meta" style={{ color: "var(--danger)", marginTop: 8, textAlign: "center" }}>
+                      Please <Link href="/login">log in</Link> to rent.
+                    </p>
+                  )}
                   {message && <p className="messageText errorText" style={{ marginTop: 8 }}>{message}</p>}
                 </form>
               </div>
