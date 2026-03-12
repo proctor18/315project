@@ -48,6 +48,8 @@ export default function ItemDetailPage() {
   const [message, setMessage] = useState("");
   const [editMode, setEditMode] = useState(false);
 
+  const [sellerRating, setSellerRating] = useState(null);
+
   // Edit form state
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -60,13 +62,15 @@ export default function ItemDetailPage() {
 
   useEffect(() => {
     if (!id) return;
+
     Promise.all([
       supabase.from("items").select("*").eq("id", id).maybeSingle(),
       supabase.from("item_specifications").select("*").eq("item_id", id),
-    ]).then(([ir, sr]) => {
+    ]).then(async ([ir, sr]) => {
       const it = ir.data ?? null;
       setItem(it);
       setSpecs(sr.data ?? []);
+
       if (it) {
         setName(it.name ?? "");
         setDescription(it.description ?? "");
@@ -75,13 +79,34 @@ export default function ItemDetailPage() {
         setSemesterRate(it.semester_rate ?? "");
         setDepositAmount(it.deposit_amount ?? "");
         setStatus(it.item_status ?? "available");
+
         if (it.location_id) {
-          supabase.from("locations").select("*").eq("id", it.location_id).maybeSingle()
-            .then(({ data }) => setLocation(data));
+          const { data } = await supabase
+            .from("locations")
+            .select("*")
+            .eq("id", it.location_id)
+            .maybeSingle();
+
+          setLocation(data);
+        }
+
+        // ⭐ NEW: FETCH SELLER RATINGS
+        const { data: ratings } = await supabase
+          .from("ratings")
+          .select("rating")
+          .eq("seller_id", it.owner_id);
+
+        if (ratings && ratings.length > 0) {
+          const avg =
+            ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length;
+
+          setSellerRating(avg.toFixed(1));
         }
       }
+
       setIsLoaded(true);
     });
+
   }, [id]);
 
   const isOwner = user && item && user.id === item.owner_id;
@@ -216,7 +241,7 @@ export default function ItemDetailPage() {
                 <div style={{ flex: 1 }}>
                   <p className="sellerName">{item.owner_name || item.owner_email}</p>
                   <p className="sellerRating">
-                    <Stars rating={item.owner_rating ?? 0} /> {item.owner_rating ? `${item.owner_rating}/5` : "No ratings yet"}
+                    <Stars rating={sellerRating ?? 0} />{sellerRating ? `${sellerRating}/5` : "No ratings yet"}
                   </p>
                 </div>
                 {/* Message Seller button — only show if logged in and not the owner */}
@@ -225,6 +250,7 @@ export default function ItemDetailPage() {
                     💬 Message
                   </button>
                 )}
+                
               </div>
             </div>
 
