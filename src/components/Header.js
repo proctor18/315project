@@ -54,7 +54,7 @@ export default function Header() {
                 <Link href="/admin" className={`${nc("/admin")} navLinkAdmin`}>Admin</Link>
               )}
               <Link href="/profile" className={`${nc("/profile")} navLinkAccount`}>Account</Link>
-              <button onClick={logout} className="navLinkLogout">
+              <button onClick={logout} className=" navLink navLinkLogout">
                 Logout
               </button>
             </>

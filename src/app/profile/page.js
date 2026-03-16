@@ -104,12 +104,7 @@ export default function ProfilePage() {
     finally { setSaving(false); }
   }
 
-  async function logout() {
-    setLoggingOut(true);
-    const { error } = await supabase.auth.signOut();
-    if (error) { setMessage(error.message); setLoggingOut(false); return; }
-    router.push("/login");
-  }
+
 
   const displayName = `${firstName} ${lastName}`.trim() || "Your Profile";
 
@@ -218,9 +213,6 @@ export default function ProfilePage() {
               <div className="actions">
                 <button type="submit" className="btn btnPrimary" disabled={saving}>
                   {saving ? "Saving..." : "Edit Profile"}
-                </button>
-                <button type="button" className="btn btnGhost" onClick={logout} disabled={loggingOut}>
-                  {loggingOut ? "Logging out..." : "Logout"}
                 </button>
               </div>
 

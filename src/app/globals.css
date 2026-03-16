@@ -277,7 +277,8 @@ a {
 }
 
 .itemCard:hover {
-  box-shadow: 0 4px 12px rgba(199, 9, 9, 0.2);;
+  box-shadow: 0 4px 12px rgba(199, 9, 9, 0.2);
+  ;
   transform: translateY(-2px);
 }
 
@@ -939,7 +940,7 @@ a {
 .btnPrimary {
   background: #004E89;
   color: #fff;
-  
+
 }
 
 .btnPrimary:hover:not(:disabled) {
@@ -950,7 +951,7 @@ a {
 .btnGhost {
   background: #A0001C;
   color: var(--text-white);
-  
+
 }
 
 .btnGhost:hover:not(:disabled) {
@@ -960,7 +961,7 @@ a {
 .btnDanger {
   background: var(--danger);
   color: #fff;
-  
+
 }
 
 .btnDanger:hover:not(:disabled) {
@@ -1352,6 +1353,20 @@ textarea {
   font-size: 13px;
 }
 
+.navLinkLogout {
+  margin-left: 8px;
+  background: #A0001C;
+  color: #000;
+  border-radius: 7px;
+  padding: 5px 16px;
+  font-weight: 500;
+  font-size: 13px;
+  color: white;
+}
+.navLinkLogout:hover{
+  background: #800016;
+}
+
 /* ItemCard */
 .itemCardLink {
   text-decoration: none;
@@ -1693,8 +1708,8 @@ textarea {
 .loginSubmitBtn {
   width: 100%;
   margin-top: 4px;
-  background: #002962 ;
- 
+  background: #002962;
+
 }
 
 .loginToggleWrap {
@@ -2387,5 +2402,5 @@ textarea {
 .heroBtnList {
   color: #fff;
   background: #A0001C;
-  
+
 }
