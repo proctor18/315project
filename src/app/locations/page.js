@@ -17,7 +17,7 @@ export default function LocationsPage() {
   return (
     <div>
       <Header />
-      <div className="container" style={{ paddingTop: 24 }}>
+      <div className="container containerPt24">
         <div className="pageHead">
           <div>
             <h1 className="pageTitle">Campus Locations</h1>
@@ -28,16 +28,16 @@ export default function LocationsPage() {
         {!loaded ? <div className="centerNotice">Loading locations...</div>
           : locations.length === 0 ? <div className="centerNotice">No active locations yet.</div>
           : (
-            <div className="cardsGrid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))" }}>
+            <div className="cardsGrid locationsGrid">
               {locations.map((loc) => (
-                <Link key={loc.id} href={`/locations/${loc.id}`} className="locationCard" style={{ textDecoration: "none", color: "inherit" }}>
-                  <div style={{ fontSize: 32, marginBottom: 12 }}>📍</div>
-                  <h2 style={{ margin: "0 0 6px", fontSize: 16, fontWeight: 700, lineHeight: 1.3 }}>{loc.name}</h2>
+                <Link key={loc.id} href={`/locations/${loc.id}`} className="locationCard locationCardLink">
+                  <div className="locationIcon">📍</div>
+                  <h2 className="locationCardH2">{loc.name}</h2>
                   <p className="meta">{loc.building}</p>
                   <p className="meta">{loc.street}, {loc.city} {loc.province}</p>
-                  <p className="meta" style={{ marginTop: 8 }}>🕐 {loc.hours}</p>
+                  <p className="meta locationHours">🕐 {loc.hours}</p>
                   {loc.contact_email && <p className="meta">✉ {loc.contact_email}</p>}
-                  <div style={{ marginTop: 16 }}>
+                  <div className="locationBrowseWrap">
                     <span className="btn btnPrimary btnSm">Browse items →</span>
                   </div>
                 </Link>

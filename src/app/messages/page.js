@@ -45,57 +45,40 @@ export default function MessagesPage() {
 
   useEffect(() => {
     if (!user) return;
-
     let cancelled = false;
-
     Promise.all([ensureProfileForUser(user), loadProfiles(), fetchMessagesForUser(user.id)]).then(
       ([ensureRes, profilesRes, messagesRes]) => {
         if (cancelled) return;
-
-        if (ensureRes.error) {
-          console.error(ensureRes.error);
-        }
-
+        if (ensureRes.error) console.error(ensureRes.error);
         if (profilesRes.error) {
           console.error(profilesRes.error);
           setMessage(profilesRes.error.message);
         } else {
-          setProfiles(
-            (profilesRes.data ?? []).filter((profile) => profile.id !== user.id)
-          );
+          setProfiles((profilesRes.data ?? []).filter((profile) => profile.id !== user.id));
         }
-
         if (messagesRes.error) {
           console.error(messagesRes.error);
           setMessage(messagesRes.error.message);
         } else {
           setMessages(messagesRes.data ?? []);
         }
-
         setIsLoaded(true);
       }
     );
-
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [user]);
 
   async function refreshData() {
     if (!user) return;
-
     setRefreshing(true);
     setMessage("");
-
     try {
       const [profilesRes, messagesRes] = await Promise.all([
         loadProfiles(),
         fetchMessagesForUser(user.id),
       ]);
-
       if (profilesRes.error) throw profilesRes.error;
       if (messagesRes.error) throw messagesRes.error;
-
       setProfiles((profilesRes.data ?? []).filter((profile) => profile.id !== user.id));
       setMessages(messagesRes.data ?? []);
     } catch (error) {
@@ -117,7 +100,6 @@ export default function MessagesPage() {
     for (const row of messages) {
       const otherUserId = otherUserIdForMessage(row);
       if (!otherUserId) continue;
-
       const previous = conversationMap.get(otherUserId);
       if (!previous || new Date(row.created_at).getTime() > new Date(previous.last.created_at).getTime()) {
         conversationMap.set(otherUserId, { otherUserId, last: row });
@@ -144,8 +126,7 @@ export default function MessagesPage() {
   const searchQuery = searchText.trim().toLowerCase();
 
   function labelForUserId(userId) {
-    const profile = profilesById[userId];
-    return userLabel(profile, "", userId);
+    return userLabel(profilesById[userId], "", userId);
   }
 
   function secondaryForUserId(userId) {
@@ -158,11 +139,7 @@ export default function MessagesPage() {
         const primary = labelForUserId(conversation.otherUserId).toLowerCase();
         const secondary = secondaryForUserId(conversation.otherUserId).toLowerCase();
         const preview = String(conversation.last.body ?? "").toLowerCase();
-        return (
-          primary.includes(searchQuery) ||
-          secondary.includes(searchQuery) ||
-          preview.includes(searchQuery)
-        );
+        return primary.includes(searchQuery) || secondary.includes(searchQuery) || preview.includes(searchQuery);
       })
     : conversations;
 
@@ -173,11 +150,7 @@ export default function MessagesPage() {
         const primary = userLabel(profile, "", profile.id).toLowerCase();
         const secondary = fullNameFromProfile(profile).toLowerCase();
         const email = String(profile.email ?? "").toLowerCase();
-        return (
-          primary.includes(searchQuery) ||
-          secondary.includes(searchQuery) ||
-          email.includes(searchQuery)
-        );
+        return primary.includes(searchQuery) || secondary.includes(searchQuery) || email.includes(searchQuery);
       })
     : [];
 
@@ -191,22 +164,17 @@ export default function MessagesPage() {
   async function sendMessage(event) {
     event.preventDefault();
     if (!user || !activeThreadUserId) return;
-
     const trimmed = text.trim();
     if (!trimmed) return;
-
     setSending(true);
     setMessage("");
-
     try {
       const { error } = await supabase.from("messages").insert({
         sender_id: user.id,
         recipient_id: activeThreadUserId,
         body: trimmed,
       });
-
       if (error) throw error;
-
       setText("");
       await refreshData();
     } catch (error) {
@@ -218,28 +186,21 @@ export default function MessagesPage() {
 
   async function deleteConversation() {
     if (!user || !activeThreadUserId) return;
-
     const ok = window.confirm(`Delete conversation with ${labelForUserId(activeThreadUserId)}?`);
     if (!ok) return;
-
     setDeleting(true);
     setMessage("");
-
     try {
       const { error } = await supabase
         .from("messages")
         .delete()
         .or(pairFilter(user.id, activeThreadUserId));
-
       if (error) throw error;
-
       setMode("list");
       setActiveUserId("");
       await refreshData();
     } catch (error) {
-      setMessage(
-        error instanceof Error ? error.message : "Failed to delete conversation."
-      );
+      setMessage(error instanceof Error ? error.message : "Failed to delete conversation.");
     } finally {
       setDeleting(false);
     }
@@ -248,8 +209,9 @@ export default function MessagesPage() {
   const inThread = mode === "thread" && !!activeThreadUserId;
 
   return (
-    <div className="container">
+    <div>
       <Header />
+      <div className="container">
 
       {!inThread ? (
         <section className="pageHead">
@@ -258,12 +220,7 @@ export default function MessagesPage() {
             <p className="pageSubtitle">Connect with other students.</p>
           </div>
           {user ? (
-            <button
-              type="button"
-              className="btn btnGhost"
-              onClick={() => void refreshData()}
-              disabled={refreshing}
-            >
+            <button type="button" className="btn btnGhost" onClick={() => void refreshData()} disabled={refreshing}>
               {refreshing ? "Refreshing..." : "Refresh"}
             </button>
           ) : null}
@@ -282,26 +239,16 @@ export default function MessagesPage() {
         <section className="threadCard">
           <div className="threadHeader">
             <div>
-              <h2 style={{ margin: 0 }}>{labelForUserId(activeThreadUserId)}</h2>
-              <p className="chatPreview" style={{ marginTop: 4 }}>
+              <h2 className="threadHeaderName">{labelForUserId(activeThreadUserId)}</h2>
+              <p className="chatPreview threadHeaderSub">
                 {secondaryForUserId(activeThreadUserId)}
               </p>
             </div>
-
-            <div className="actions" style={{ marginTop: 0 }}>
-              <button
-                type="button"
-                className="btn btnDanger"
-                onClick={deleteConversation}
-                disabled={deleting}
-              >
+            <div className="actions threadActionsRow">
+              <button type="button" className="btn btnDanger" onClick={deleteConversation} disabled={deleting}>
                 {deleting ? "Deleting..." : "Delete"}
               </button>
-              <button
-                type="button"
-                className="btn btnGhost"
-                onClick={() => setMode("list")}
-              >
+              <button type="button" className="btn btnGhost" onClick={() => setMode("list")}>
                 Back
               </button>
             </div>
@@ -314,10 +261,7 @@ export default function MessagesPage() {
               activeThreadMessages.map((row) => {
                 const mine = row.sender_id === user.id;
                 return (
-                  <div
-                    key={row.id}
-                    className={`bubbleWrap ${mine ? "bubbleWrapMine" : ""}`}
-                  >
+                  <div key={row.id} className={`bubbleWrap ${mine ? "bubbleWrapMine" : ""}`}>
                     <div className={`bubble ${mine ? "bubbleMine" : "bubbleOther"}`}>
                       {row.body}
                     </div>
@@ -335,11 +279,7 @@ export default function MessagesPage() {
               disabled={sending || deleting}
               required
             />
-            <button
-              type="submit"
-              className="btn btnPrimary"
-              disabled={sending || deleting}
-            >
+            <button type="submit" className="btn btnPrimary" disabled={sending || deleting}>
               {sending ? "Sending..." : "Send"}
             </button>
           </form>
@@ -347,7 +287,7 @@ export default function MessagesPage() {
       ) : (
         <section className="chatList">
           {requestedUserId && requestedUserId !== user.id && !profilesById[requestedUserId] ? (
-            <div className="centerNotice" style={{ marginBottom: 12 }}>
+            <div className="centerNotice chatUserNotFound">
               User not found yet. Refresh after they complete signup/profile setup.
             </div>
           ) : null}
@@ -374,9 +314,7 @@ export default function MessagesPage() {
                 <button
                   key={conversation.otherUserId}
                   type="button"
-                  className={`chatRow ${
-                    activeUserId === conversation.otherUserId ? "chatRowActive" : ""
-                  }`}
+                  className={`chatRow ${activeUserId === conversation.otherUserId ? "chatRowActive" : ""}`}
                   onClick={() => openThread(conversation.otherUserId)}
                 >
                   <div className="chatTop">
@@ -388,10 +326,7 @@ export default function MessagesPage() {
 
               {visibleNewUsers.length > 0 ? (
                 <>
-                  <p className="label" style={{ marginTop: 8 }}>
-                    Start a conversation
-                  </p>
-
+                  <p className="label chatStartLabel">Start a conversation</p>
                   {visibleNewUsers.map((profile) => (
                     <button
                       key={profile.id}
@@ -419,6 +354,7 @@ export default function MessagesPage() {
           {message}
         </p>
       ) : null}
+      </div>
     </div>
   );
 }

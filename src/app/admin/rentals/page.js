@@ -21,7 +21,7 @@ export default function AdminRentalsPage() {
 
   useEffect(() => { load(); }, [statusFilter]);
   useEffect(() => { if (!authLoading && (!user || !isAdmin)) router.push("/"); }, [authLoading, user, isAdmin, router]);
-  if (authLoading) return <div><Header /><div className="container"><div className="centerNotice" style={{ marginTop: 24 }}>Loading...</div></div></div>;
+  if (authLoading) return <div><Header /><div className="container"><div className="centerNotice containerPt24">Loading...</div></div></div>;
   if (!isAdmin) return null;
 
   async function load() {
@@ -57,8 +57,8 @@ export default function AdminRentalsPage() {
       <Header />
       <AdminLayout>
         <div className="pageHead">
-          <h1 style={{ fontSize: 22, fontWeight: 800, margin: 0 }}>Manage Rentals</h1>
-          <div style={{ display: "flex", gap: 6 }}>
+          <h1 className="adminPageH1">Manage Rentals</h1>
+          <div className="adminStatusFilterRow">
             {["", "active", "overdue", "returned", "cancelled"].map((s) => (
               <button key={s} onClick={() => setStatusFilter(s)}
                 className={`btn btnSm ${statusFilter === s ? "btnPrimary" : "btnGhost"}`}>
@@ -70,23 +70,23 @@ export default function AdminRentalsPage() {
 
         {message && <p className="messageText successText">{message}</p>}
 
-        <div className="card" style={{ padding: 0, overflow: "hidden" }}>
+        <div className="card adminTableCard">
           <table className="table">
             <thead>
               <tr><th>Rental ID</th><th>Item</th><th>Start</th><th>Expected Return</th><th>Type</th><th>Total</th><th>Status</th><th>Actions</th></tr>
             </thead>
             <tbody>
-              {!loaded ? <tr><td colSpan={8} style={{ textAlign: "center", color: "var(--text-muted)", padding: 32 }}>Loading...</td></tr>
-                : rentals.length === 0 ? <tr><td colSpan={8} style={{ textAlign: "center", color: "var(--text-muted)", padding: 32 }}>No rentals.</td></tr>
+              {!loaded ? <tr><td colSpan={8} className="adminTableEmpty">Loading...</td></tr>
+                : rentals.length === 0 ? <tr><td colSpan={8} className="adminTableEmpty">No rentals.</td></tr>
                 : rentals.map((r) => {
                   const overdue = r.status === "active" && new Date(r.expected_return_date) < new Date();
                   return (
-                    <tr key={r.id} style={{ background: overdue ? "#fff5f5" : "" }}>
-                      <td style={{ fontWeight: 600 }}>{r.id}</td>
+                    <tr key={r.id} className={overdue ? "adminTrOverdue" : ""}>
+                      <td className="adminTdBold">{r.id}</td>
                       <td>#{r.item_id}</td>
                       <td>{fmtDate(r.start_date)}</td>
                       <td>{fmtDate(r.expected_return_date)}</td>
-                      <td style={{ textTransform: "capitalize" }}>{r.rental_type}</td>
+                      <td className="adminTdCapitalize">{r.rental_type}</td>
                       <td>{fmtPrice(r.total_cost)}</td>
                       <td>
                         <span className={`badge ${overdue ? "badgeRed" : r.status === "returned" ? "badgeGreen" : "badgeBlue"}`}>

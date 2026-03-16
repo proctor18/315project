@@ -29,7 +29,6 @@ const SIDEBAR_LINKS = [
   { href: "/my-rentals", label: "My Rentals" },
 ];
 
-
 export default function ProfilePage() {
   const { user, loading } = useAuth();
   const router = useRouter();
@@ -50,8 +49,6 @@ export default function ProfilePage() {
   const [photoURL, setPhotoURL] = useState("");
   const [photoPath, setPhotoPath] = useState("");
   const [newPhotoFile, setNewPhotoFile] = useState(null);
-
-  // Current rentals summary for sidebar
   const [activeRentals, setActiveRentals] = useState([]);
 
   useEffect(() => {
@@ -69,7 +66,6 @@ export default function ProfilePage() {
       setPhotoPath(data?.profile_photo_path ?? "");
       setLoaded(true);
     });
-    // load active rentals for sidebar
     supabase.from("rental_transactions").select("id, status, expected_return_date, item_id")
       .eq("renter_id", user.id).eq("status", "active").limit(3)
       .then(({ data }) => { if (!cancelled) setActiveRentals(data ?? []); });
@@ -82,7 +78,6 @@ export default function ProfilePage() {
     if (!firstName.trim() || !lastName.trim()) { setMessage("First and last name required."); return; }
     const imgErr = validateImageFile(newPhotoFile);
     if (imgErr) { setMessage(imgErr); return; }
-
     setSaving(true); setMessage("");
     try {
       let nextPhotoURL = photoURL, nextPhotoPath = photoPath;
@@ -119,10 +114,10 @@ export default function ProfilePage() {
   const displayName = `${firstName} ${lastName}`.trim() || "Your Profile";
 
   if (loading || (user && !loaded)) {
-    return <div><Header /><div className="container"><div className="centerNotice" style={{ marginTop: 24 }}>Loading...</div></div></div>;
+    return <div><Header /><div className="container"><div className="centerNotice containerPt24">Loading...</div></div></div>;
   }
   if (!user) {
-    return <div><Header /><div className="container"><div className="centerNotice" style={{ marginTop: 24 }}>Please <Link href="/login">log in</Link>.</div></div></div>;
+    return <div><Header /><div className="container"><div className="centerNotice containerPt24">Please <Link href="/login">log in</Link>.</div></div></div>;
   }
 
   return (
@@ -133,7 +128,7 @@ export default function ProfilePage() {
         <aside className="accountSidebar">
           <div className="sidebarUser">
             {photoURL ? (
-              <img src={photoURL} alt="Profile" className="sidebarAvatar" style={{ width: 72, height: 72, borderRadius: "50%", objectFit: "cover" }} />
+              <img src={photoURL} alt="Profile" className="sidebarAvatar sidebarAvatarImg" />
             ) : (
               <div className="sidebarAvatar">{(displayName[0] || "U").toUpperCase()}</div>
             )}
@@ -150,14 +145,12 @@ export default function ProfilePage() {
           </ul>
 
           {activeRentals.length > 0 && (
-            <div style={{ padding: "16px 20px 0", borderTop: "1px solid var(--line)", marginTop: 8 }}>
-              <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--text-muted)", margin: "0 0 8px" }}>
-                Current Rentals
-              </p>
+            <div className="sidebarRentalsSection">
+              <p className="sidebarRentalsTitle">Current Rentals</p>
               {activeRentals.map((r) => (
-                <Link key={r.id} href={`/rentals/${r.id}`} style={{ display: "block", marginBottom: 8 }}>
-                  <p style={{ fontSize: 12, fontWeight: 600, margin: 0 }}>#{r.id}</p>
-                  <p style={{ fontSize: 11, color: "var(--text-muted)", margin: 0 }}>
+                <Link key={r.id} href={`/rentals/${r.id}`} className="sidebarRentalLink">
+                  <p className="sidebarRentalId">#{r.id}</p>
+                  <p className="sidebarRentalDue">
                     Due: {new Date(r.expected_return_date).toLocaleDateString()}
                   </p>
                 </Link>
@@ -168,9 +161,9 @@ export default function ProfilePage() {
 
         {/* Main content */}
         <div className="accountContent">
-          <h1 className="pageTitle" style={{ marginBottom: 24 }}>Account Main</h1>
+          <h1 className="pageTitle profilePageTitle">Account Main</h1>
 
-          <div className="profileShell" style={{ gridTemplateColumns: "180px 1fr" }}>
+          <div className="profileShell profileShellNarrow">
             {/* Photo card */}
             <div className="profileCard">
               {photoURL ? (
@@ -184,9 +177,9 @@ export default function ProfilePage() {
 
             {/* Edit form */}
             <form className="formCard" onSubmit={saveProfile}>
-              <h2 style={{ margin: "0 0 20px", fontSize: 16 }}>Personal Information</h2>
+              <h2 className="profileFormTitle">Personal Information</h2>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <div className="profileFormGrid">
                 <div className="field">
                   <label className="label">First Name</label>
                   <input value={firstName} onChange={(e) => setFirstName(e.target.value)} required />

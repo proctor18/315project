@@ -20,9 +20,9 @@ export function AdminLayout({ children }) {
   return (
     <div className="adminLayout">
       <aside className="adminSidebar">
-        <div style={{ background: "#000", color: "#fff", padding: "14px 20px", display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ fontWeight: 900, fontSize: 16, letterSpacing: "0.06em" }}>RENTIFY</span>
-          <span style={{ fontSize: 11, opacity: 0.6, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em" }}>Admin</span>
+        <div className="adminSidebarHeader">
+          <span className="adminSidebarBrand">RENTIFY</span>
+          <span className="adminSidebarTag">Admin</span>
         </div>
         <ul className="adminNav">
           {ADMIN_LINKS.map(({ href, label, icon }) => (
@@ -67,12 +67,11 @@ export default function AdminDashboardPage() {
     load();
   }, []);
 
-  // Redirect non-admins
   useEffect(() => {
     if (!authLoading && (!user || !isAdmin)) router.push("/");
   }, [authLoading, user, isAdmin, router]);
 
-  if (authLoading) return <div><Header /><div className="container"><div className="centerNotice" style={{ marginTop: 24 }}>Loading...</div></div></div>;
+  if (authLoading) return <div><Header /><div className="container"><div className="centerNotice containerPt24">Loading...</div></div></div>;
   if (!isAdmin) return null;
 
   function fmtPrice(v) { return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(v); }
@@ -91,7 +90,7 @@ export default function AdminDashboardPage() {
     <div>
       <Header />
       <AdminLayout>
-        <h1 style={{ fontSize: 22, fontWeight: 800, margin: "0 0 24px" }}>Dashboard</h1>
+        <h1 className="adminPageH1Mb">Dashboard</h1>
 
         <div className="statsGrid">
           {statCards.map((s) => (
@@ -103,9 +102,9 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Recent Activity */}
-        <div className="card" style={{ padding: 0, overflow: "hidden" }}>
-          <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--line)" }}>
-            <h2 style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>Recent Activity</h2>
+        <div className="card adminTableCard">
+          <div className="adminActivityHeader">
+            <h2 className="adminActivityH2">Recent Activity</h2>
           </div>
           <table className="table">
             <thead>
@@ -113,15 +112,15 @@ export default function AdminDashboardPage() {
             </thead>
             <tbody>
               {!loaded ? (
-                <tr><td colSpan={4} style={{ textAlign: "center", color: "var(--text-muted)" }}>Loading...</td></tr>
+                <tr><td colSpan={4} className="adminTableEmptyInline">Loading...</td></tr>
               ) : recent.length === 0 ? (
-                <tr><td colSpan={4} style={{ textAlign: "center", color: "var(--text-muted)" }}>No activity yet.</td></tr>
+                <tr><td colSpan={4} className="adminTableEmptyInline">No activity yet.</td></tr>
               ) : recent.map((r) => (
                 <tr key={r.id}>
-                  <td style={{ color: "var(--text-muted)" }}>{fmtTime(r.created_at)}</td>
+                  <td className="adminTdMuted">{fmtTime(r.created_at)}</td>
                   <td>New rental</td>
-                  <td><Link href={`/rentals/${r.id}`} style={{ fontWeight: 600 }}>{r.id}</Link></td>
-                  <td style={{ color: "var(--text-muted)" }}>Item #{r.item_id}</td>
+                  <td><Link href={`/rentals/${r.id}`} className="adminRentalLink">{r.id}</Link></td>
+                  <td className="adminTdMuted">Item #{r.item_id}</td>
                 </tr>
               ))}
             </tbody>
@@ -130,9 +129,9 @@ export default function AdminDashboardPage() {
 
         {/* Alerts */}
         {loaded && (stats.overdueRentals > 0 || stats.suspendedUsers > 0) && (
-          <div style={{ marginTop: 16, background: "#374151", color: "#fff", borderRadius: 10, padding: "14px 18px", fontSize: 13 }}>
-            <p style={{ margin: "0 0 8px", fontWeight: 700 }}>Alerts</p>
-            <ul style={{ margin: 0, padding: "0 0 0 16px", lineHeight: 1.9 }}>
+          <div className="adminAlertsBox">
+            <p className="adminAlertsTitle">Alerts</p>
+            <ul className="adminAlertsList">
               {stats.overdueRentals > 0 && <li>{stats.overdueRentals} item{stats.overdueRentals !== 1 ? "s are" : " is"} overdue</li>}
               {stats.pendingReturns > 0 && <li>{stats.pendingReturns} items pending return today</li>}
               {stats.suspendedUsers > 0 && <li>{stats.suspendedUsers} user{stats.suspendedUsers !== 1 ? "s" : ""} currently suspended</li>}

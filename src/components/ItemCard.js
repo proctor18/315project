@@ -13,17 +13,16 @@ export default function ItemCard({ item, href, showOwner = true, actionLabel }) 
   const condLabel = item.condition?.replace("_", " ") ?? null;
 
   return (
-    <Link href={href} style={{ textDecoration: "none", color: "inherit", display: "block" }}>
+    <Link href={href} className="itemCardLink">
       <div className="itemCard">
         {item.photo_url ? (
           <img
             className="itemCardImg"
             src={item.photo_url}
             alt={item.name}
-            style={{ aspectRatio: "16/10", objectFit: "cover" }}
           />
         ) : (
-          <div className="itemCardImgPlaceholder" style={{ aspectRatio: "16/10" }}>
+          <div className="itemCardImgPlaceholder">
             No image
           </div>
         )}
@@ -31,7 +30,7 @@ export default function ItemCard({ item, href, showOwner = true, actionLabel }) 
           {price && (
             <p className="itemCardPrice">
               {price}
-              <span style={{ fontWeight: 400, color: "#64748b", fontSize: 11 }}>/day</span>
+              <span className="itemCardPriceUnit">/day</span>
             </p>
           )}
           <p className="itemCardName">{item.name}</p>
@@ -39,7 +38,7 @@ export default function ItemCard({ item, href, showOwner = true, actionLabel }) 
             <p className="itemCardMeta">{item.owner_name}</p>
           )}
           {actionLabel && (
-            <p className="itemCardMeta" style={{ marginTop: 6, color: "#000", fontWeight: 600 }}>
+            <p className="itemCardMeta itemCardAction">
               {actionLabel} →
             </p>
           )}

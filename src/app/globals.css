@@ -886,3 +886,428 @@ textarea { min-height: 100px; resize: vertical; }
   .navRow { padding: 0 8px; }
   .navLink { font-size: 12px; padding: 4px 8px; }
 }
+
+/* ─── Refactored: formerly inline styles ─────────────── */
+
+/* Nav */
+.navActions { display: flex; align-items: center; gap: 2px; margin-left: auto; flex-shrink: 0; }
+.navLinkAdmin { margin-left: 4px; color: rgba(255,255,255,0.6); font-size: 12px; }
+.navLinkAccount {
+  margin-left: 8px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.22);
+  border-radius: 7px;
+  padding: 4px 14px;
+  color: #fff;
+}
+.navLinkLogin {
+  margin-left: 8px;
+  background: #fff;
+  color: #000;
+  border-radius: 7px;
+  padding: 5px 16px;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+/* ItemCard */
+.itemCardLink { text-decoration: none; color: inherit; display: block; }
+.itemCardImg { aspect-ratio: 16/10; object-fit: cover; }
+.itemCardImgPlaceholder { aspect-ratio: 16/10; }
+.itemCardPriceUnit { font-weight: 400; color: #64748b; font-size: 11px; }
+.itemCardAction { margin-top: 6px; color: #000; font-weight: 600; }
+
+/* Page containers */
+.containerPt24 { padding-top: 24px; }
+.containerPt32 { padding-top: 32px; }
+.containerPt48 { padding-top: 48px; }
+
+/* Back links */
+.backLink { font-size: 13px; color: var(--text-muted); }
+
+/* Detail layout spacing */
+.detailLayoutSpaced { margin-top: 20px; }
+.detailGallerySticky { position: sticky; top: 80px; }
+.detailNoImg {
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  font-size: 14px;
+}
+.fieldMt { margin-top: 12px; }
+.detailMeta { margin-bottom: 16px; }
+.detailCategory {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+.detailTitleInput {
+  font-size: 24px;
+  font-weight: 800;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 6px 10px;
+  width: 100%;
+}
+.detailH1 { font-size: 26px; font-weight: 800; margin: 0; line-height: 1.2; }
+.detailBadgeRow { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; align-items: center; }
+.detailQtyLabel { font-size: 12px; color: var(--text-muted); }
+.specsTd { padding: 4px 12px 4px 0; font-size: 13px; color: var(--text-muted); white-space: nowrap; }
+.specsTdVal { padding: 4px 0; font-size: 13px; font-weight: 500; }
+.locationName { margin: 0; font-size: 14px; }
+.locationBuilding { margin: 2px 0 0; font-size: 13px; color: var(--text-muted); }
+.sellerInfo { flex: 1; }
+.btnFlexShrink0 { flex-shrink: 0; }
+.pricingEditGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.detailDescText { margin: 0; font-size: 14px; line-height: 1.7; color: var(--text-muted); }
+.detailDescTextarea { width: 100%; font-size: 14px; }
+.actionsMt { margin-top: 20px; }
+.actionsMt8 { margin-top: 8px; }
+.rentBtnFull {
+  flex: 1;
+  justify-content: center;
+}
+.rentBtnUnavailable { opacity: 0.5; pointer-events: none; }
+
+/* Rent page */
+.rentPageGrid {
+  display: grid;
+  grid-template-columns: 1fr 440px;
+  gap: 24px;
+  margin-top: 20px;
+  align-items: start;
+}
+.rentItemImg {
+  width: 100%;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  aspect-ratio: 4/3;
+  object-fit: cover;
+}
+.rentItemNoImg {
+  width: 100%;
+  aspect-ratio: 4/3;
+  background: #f1f5f9;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+}
+.rentItemSummary { margin-bottom: 20px; }
+.rentItemName { margin: 0 0 4px; font-weight: 700; font-size: 15px; }
+.rentRequiredNote { font-size: 12px; color: var(--danger); margin: 0 0 14px; }
+.rentDateGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.rentTypeRow { display: flex; gap: 20px; flex-wrap: wrap; }
+.rentTypeLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.rentTypeRadio { width: 16px; height: 16px; margin: 0; padding: 0; flex-shrink: 0; }
+.rentLocationWarning { color: var(--warning); margin-top: 4px; }
+.rentNoCardWarning { color: var(--danger); }
+.rentCardLabel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+.rentCardLabelSelected { border: 1px solid var(--primary, #000); }
+.rentCardLabelUnselected { border: 1px solid var(--line, #e2e8f0); }
+.rentCardRadio { width: 16px; height: 16px; margin: 0; flex-shrink: 0; }
+.rentCardExpiry { color: var(--text-muted); margin-left: 8px; }
+.rentManageLink { font-size: 12px; color: var(--text-muted); }
+.rentSubmitBtn { width: 100%; }
+.rentLoginNote { color: var(--danger); margin-top: 8px; text-align: center; }
+
+/* Login page */
+.loginWrapper { max-width: 420px; margin: 0 auto; }
+.loginLogoWrap { text-align: center; margin-bottom: 32px; }
+.loginLogo {
+  display: inline-block;
+  background: #000;
+  color: #fff;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-weight: 900;
+  font-size: 22px;
+  letter-spacing: 0.05em;
+  margin-bottom: 16px;
+}
+.loginHeading { font-size: 24px; font-weight: 800; margin: 0 0 6px; }
+.loginSubmitBtn { width: 100%; margin-top: 4px; }
+.loginToggleWrap { text-align: center; margin-top: 16px; font-size: 14px; color: var(--text-muted); }
+.loginToggleBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #000;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 0;
+}
+
+/* Receipt / rental status */
+.receiptPageCenter { max-width: 480px; margin: 0 auto; text-align: center; }
+.receiptStatusIcon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  margin: 0 auto 16px;
+}
+.receiptStatusIconPending { background: #f59e0b; }
+.receiptStatusIconDenied { background: #ef4444; }
+.receiptStatusIconConfirmed {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #000;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  margin: 0 auto 12px;
+}
+.receiptStatusH1 { font-size: 24px; font-weight: 800; margin: 0 0 8px; }
+.receiptStatusSub { color: var(--text-muted); margin-bottom: 24px; }
+.receiptDetailsBox {
+  background: var(--surface-muted);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  text-align: left;
+}
+.receiptDetailsTitle { margin: 0 0 6px; font-weight: 700; font-size: 13px; }
+.receiptDetailsMeta { margin: 0 0 4px; font-size: 13px; color: var(--text-muted); }
+.receiptDetailsMetaLast { margin: 0; font-size: 13px; color: var(--text-muted); }
+.receiptPolling { font-size: 12px; color: var(--text-muted); margin-bottom: 20px; }
+.receiptPollingDot { display: inline-block; animation: pulse 1.5s infinite; }
+.receiptActionsCenter { justify-content: center; }
+.receiptConfirmBanner { text-align: center; margin-bottom: 28px; }
+.receiptConfirmH1 { font-size: 26px; font-weight: 800; margin: 0 0 6px; }
+.receiptConfirmSub { color: var(--text-muted); margin: 0; }
+.receiptTypeVal { text-transform: capitalize; }
+.receiptCostRow { padding: 4px 0; }
+.receiptPaymentLabel { margin: 0; font-size: 14px; font-weight: 600; }
+.receiptImportantBox {
+  background: var(--surface-muted);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-top: 16px;
+}
+.receiptImportantTitle { margin: 0 0 8px; font-weight: 700; font-size: 13px; }
+.receiptImportantList { margin: 0; padding: 0 0 0 18px; font-size: 13px; color: var(--text-muted); line-height: 1.8; }
+.receiptActionsMt { justify-content: center; margin-top: 24px; }
+
+/* Locations */
+.locationsGrid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+.locationCardLink { text-decoration: none; color: inherit; }
+.locationIcon { font-size: 32px; margin-bottom: 12px; }
+.locationCardH2 { margin: 0 0 6px; font-size: 16px; font-weight: 700; line-height: 1.3; }
+.locationHours { margin-top: 8px; }
+.locationBrowseWrap { margin-top: 16px; }
+.locationFilterRow { display: flex; gap: 10px; margin-bottom: 20px; align-items: center; }
+.locationCondSelect { width: auto; padding: 6px 10px; }
+.locationMaxInput { width: 160px; padding: 6px 10px; }
+.pageHeadMt { margin-top: 12px; }
+
+/* Rate page */
+.rateWrapper { max-width: 500px; margin: 0 auto; padding: 24px; }
+.rateH1 { font-size: 24px; font-weight: 700; margin-bottom: 16px; }
+.rateLabel { display: block; margin-bottom: 8px; }
+.rateLabelReview { display: block; margin-bottom: 16px; }
+.rateSelect { display: block; width: 100%; margin-top: 4px; margin-bottom: 16px; }
+.rateTextarea { display: block; width: 100%; margin-top: 4px; }
+.rateSubmitBtn {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  font-weight: 700;
+  background-color: #000;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.rateMessage { margin-top: 12px; }
+.rateMessageSuccess { color: green; }
+.rateMessageError { color: red; }
+
+/* Messages */
+.threadHeaderName { margin: 0; }
+.threadHeaderSub { margin-top: 4px; }
+.threadActionsRow { margin-top: 0; }
+.chatUserNotFound { margin-bottom: 12px; }
+.chatStartLabel { margin-top: 8px; }
+
+/* Profile / Account sidebar */
+.sidebarAvatarImg { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; }
+.sidebarRentalsSection {
+  padding: 16px 20px 0;
+  border-top: 1px solid var(--line);
+  margin-top: 8px;
+}
+.sidebarRentalsTitle {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin: 0 0 8px;
+}
+.sidebarRentalLink { display: block; margin-bottom: 8px; }
+.sidebarRentalId { font-size: 12px; font-weight: 600; margin: 0; }
+.sidebarRentalDue { font-size: 11px; color: var(--text-muted); margin: 0; }
+
+/* Profile main */
+.profilePageTitle { margin-bottom: 24px; }
+.profileShellNarrow { grid-template-columns: 180px 1fr; }
+.profileFormTitle { margin: 0 0 20px; font-size: 16px; }
+.profileFormGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* Shared account sidebar slim */
+.sidebarUserSlim { padding: 20px 20px 16px; }
+
+/* Payment methods */
+.paymentAddBtnMt { margin-top: 20px; }
+.paymentFormMt { margin-top: 20px; }
+.paymentCancelBtn { margin-left: 10px; }
+.paymentCardsGridMt { margin-top: 30px; }
+.paymentCardActionsMt { margin-top: 10px; }
+
+/* My Rentals */
+.myRentalsTitle { margin-bottom: 20px; }
+.rentalCardHeaderRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+.rentalOverdueWarning { font-size: 13px; color: var(--danger); font-weight: 600; margin: 4px 0 0; }
+
+/* My Items */
+.requestsSubTabRow { display: flex; gap: 10px; margin-bottom: 16px; }
+.requestsEmptyMt { margin-top: 32px; }
+.requestsEmptyTitle { font-size: 15px; margin-bottom: 8px; }
+.requestsEmptySubtitle { font-size: 13px; color: var(--text-muted); }
+.requestsList { display: flex; flex-direction: column; gap: 14px; margin-top: 4px; }
+.requestCard {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px 20px;
+  background: var(--surface);
+}
+.requestCardRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.requestCardInfo { flex: 1; }
+.requestCardName { margin: 0 0 4px; font-weight: 700; font-size: 15px; }
+.requestCardMeta { margin: 0 0 2px; font-size: 13px; color: var(--text-muted); }
+.requestCardTotal { margin: 0 0 8px; font-size: 14px; font-weight: 700; color: var(--text); }
+.requestCardActions { display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; }
+.requestCardBtn { min-width: 110px; }
+.requestTypeCapitalize { text-transform: capitalize; }
+.tabBadgeRed { background: #ef4444; }
+
+/* Items new */
+.newItemFormTitle { margin: 16px 0 8px; }
+.newItemPriceGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.newItemActionsMt { margin-top: 16px; }
+
+/* Admin */
+.adminSidebarHeader {
+  background: #000;
+  color: #fff;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.adminSidebarBrand { font-weight: 900; font-size: 16px; letter-spacing: 0.06em; }
+.adminSidebarTag { font-size: 11px; opacity: 0.6; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+.adminPageH1 { font-size: 22px; font-weight: 800; margin: 0; }
+.adminPageH1Mb { font-size: 22px; font-weight: 800; margin: 0 0 24px; }
+.adminStatusFilterRow { display: flex; gap: 6px; }
+.adminTableCard { padding: 0; overflow: hidden; }
+.adminTableEmpty { text-align: center; color: var(--text-muted); padding: 32px; }
+.adminTableEmptyInline { text-align: center; color: var(--text-muted); }
+.adminTdBold { font-weight: 600; }
+.adminTdMuted { color: var(--text-muted); }
+.adminTdCapitalize { text-transform: capitalize; }
+.adminTrOverdue { background: #fff5f5; }
+.adminTrBanned { background: #fff5f5; }
+.adminCardFlex { display: flex; justify-content: space-between; align-items: center; }
+.adminCardLocName { margin: 0 0 2px; font-weight: 700; }
+.adminActivityHeader {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--line);
+}
+.adminActivityH2 { margin: 0; font-size: 15px; font-weight: 700; }
+.adminRentalLink { font-weight: 600; }
+.adminAlertsBox {
+  margin-top: 16px;
+  background: #374151;
+  color: #fff;
+  border-radius: 10px;
+  padding: 14px 18px;
+  font-size: 13px;
+}
+.adminAlertsTitle { margin: 0 0 8px; font-weight: 700; }
+.adminAlertsList { margin: 0; padding: 0 0 0 16px; line-height: 1.9; }
+.adminLocationsFormGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+.adminLocFormMb { margin-bottom: 24px; }
+.adminLocFormH2 { margin: 0 0 16px; font-size: 15px; }
+
+/* Hero (home page) */
+.hero {
+  background: #000;
+  color: #fff;
+  border-radius: 16px;
+  padding: 48px 40px;
+  margin: 24px 0 32px;
+  background-image: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+}
+.heroEyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.6;
+  margin: 0 0 10px;
+}
+.heroH1 {
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 900;
+  margin: 0 0 12px;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+.heroSubtitle { opacity: 0.7; font-size: 15px; margin: 0 0 24px; max-width: 480px; }
+.heroBtns { display: flex; gap: 10px; }
+.heroBtnLocations { background: #fff; color: #000; }
+.heroBtnList { border: 1px solid rgba(255,255,255,0.3); color: #fff; }

@@ -44,15 +44,15 @@ export default function AdminLocationsPage() {
       <Header />
       <AdminLayout>
         <div className="pageHead">
-          <h1 style={{ fontSize: 22, fontWeight: 800, margin: 0 }}>Manage Locations</h1>
+          <h1 className="adminPageH1">Manage Locations</h1>
           <button className="btn btnPrimary" onClick={() => { setEditing("new"); setForm(EMPTY); }}>+ Add Location</button>
         </div>
         {message && <p className="messageText successText">{message}</p>}
 
         {editing && (
-          <form className="formCard" onSubmit={save} style={{ marginBottom: 24 }}>
-            <h2 style={{ margin: "0 0 16px", fontSize: 15 }}>{editing === "new" ? "Add New Location" : "Edit Location"}</h2>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 0 }}>
+          <form className="formCard adminLocFormMb" onSubmit={save}>
+            <h2 className="adminLocFormH2">{editing === "new" ? "Add New Location" : "Edit Location"}</h2>
+            <div className="adminLocationsFormGrid">
               {f("Location ID (e.g. L003)", "id")}
               {f("Name", "name")}
               {f("Building", "building")}
@@ -81,9 +81,9 @@ export default function AdminLocationsPage() {
         <div className="stack">
           {!loaded ? <div className="centerNotice">Loading...</div>
             : locations.map((loc) => (
-              <div key={loc.id} className="card" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div key={loc.id} className="card adminCardFlex">
                 <div>
-                  <p style={{ margin: "0 0 2px", fontWeight: 700 }}>{loc.name}</p>
+                  <p className="adminCardLocName">{loc.name}</p>
                   <p className="meta">{loc.building} · {loc.city}, {loc.province}</p>
                   <p className="meta">Hours: {loc.hours}</p>
                   <span className={`badge ${loc.status === "active" ? "badgeGreen" : "badgeGray"}`}>{loc.status}</span>

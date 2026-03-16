@@ -54,14 +54,12 @@ export default function LoginPage() {
   return (
     <div>
       <Header />
-      <div className="container" style={{ paddingTop: 48 }}>
-        <div style={{ maxWidth: 420, margin: "0 auto" }}>
+      <div className="container containerPt48">
+        <div className="loginWrapper">
           {/* Logo */}
-          <div style={{ textAlign: "center", marginBottom: 32 }}>
-            <div style={{ display: "inline-block", background: "#000", color: "#fff", padding: "8px 18px", borderRadius: 8, fontWeight: 900, fontSize: 22, letterSpacing: "0.05em", marginBottom: 16 }}>
-              RENTIFY
-            </div>
-            <h1 style={{ fontSize: 24, fontWeight: 800, margin: "0 0 6px" }}>
+          <div className="loginLogoWrap">
+            <div className="loginLogo">RENTIFY</div>
+            <h1 className="loginHeading">
               {mode === "signup" ? "Create an account" : "Welcome back"}
             </h1>
           </div>
@@ -94,7 +92,7 @@ export default function LoginPage() {
               </div>
             )}
 
-            <button type="submit" className="btn btnPrimary" style={{ width: "100%", marginTop: 4 }} disabled={saving}>
+            <button type="submit" className="btn btnPrimary loginSubmitBtn" disabled={saving}>
               {saving ? (mode === "signup" ? "Creating..." : "Signing in...") : (mode === "signup" ? "Sign up" : "Login")}
             </button>
 
@@ -105,11 +103,11 @@ export default function LoginPage() {
             )}
           </form>
 
-          <p style={{ textAlign: "center", marginTop: 16, fontSize: 14, color: "var(--text-muted)" }}>
+          <p className="loginToggleWrap">
             {mode === "signup" ? "Already have an account? " : "Don't have an account? "}
             <button
               onClick={() => { setMode(mode === "signup" ? "signin" : "signup"); setMessage(""); }}
-              style={{ background: "none", border: "none", cursor: "pointer", color: "#000", fontWeight: 600, fontSize: 14, padding: 0 }}
+              className="loginToggleBtn"
             >
               {mode === "signup" ? "Sign in" : "Sign up"}
             </button>

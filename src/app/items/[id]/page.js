@@ -47,10 +47,8 @@ export default function ItemDetailPage() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [editMode, setEditMode] = useState(false);
-
   const [sellerRating, setSellerRating] = useState(null);
 
-  // Edit form state
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [dailyRate, setDailyRate] = useState("");
@@ -62,7 +60,6 @@ export default function ItemDetailPage() {
 
   useEffect(() => {
     if (!id) return;
-
     Promise.all([
       supabase.from("items").select("*").eq("id", id).maybeSingle(),
       supabase.from("item_specifications").select("*").eq("item_id", id),
@@ -70,7 +67,6 @@ export default function ItemDetailPage() {
       const it = ir.data ?? null;
       setItem(it);
       setSpecs(sr.data ?? []);
-
       if (it) {
         setName(it.name ?? "");
         setDescription(it.description ?? "");
@@ -79,34 +75,18 @@ export default function ItemDetailPage() {
         setSemesterRate(it.semester_rate ?? "");
         setDepositAmount(it.deposit_amount ?? "");
         setStatus(it.item_status ?? "available");
-
         if (it.location_id) {
-          const { data } = await supabase
-            .from("locations")
-            .select("*")
-            .eq("id", it.location_id)
-            .maybeSingle();
-
+          const { data } = await supabase.from("locations").select("*").eq("id", it.location_id).maybeSingle();
           setLocation(data);
         }
-
-        // ⭐ NEW: FETCH SELLER RATINGS
-        const { data: ratings } = await supabase
-          .from("ratings")
-          .select("rating")
-          .eq("seller_id", it.owner_id);
-
+        const { data: ratings } = await supabase.from("ratings").select("rating").eq("seller_id", it.owner_id);
         if (ratings && ratings.length > 0) {
-          const avg =
-            ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length;
-
+          const avg = ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length;
           setSellerRating(avg.toFixed(1));
         }
       }
-
       setIsLoaded(true);
     });
-
   }, [id]);
 
   const isOwner = user && item && user.id === item.owner_id;
@@ -144,7 +124,6 @@ export default function ItemDetailPage() {
     if (!window.confirm("Delete this item?")) return;
     setBusy(true); setMessage("");
     try {
-      // First delete any rental_transactions referencing this item
       const { error: rtError } = await supabase.from("rental_transactions").delete().eq("item_id", item.id);
       if (rtError) throw rtError;
       const { error } = await supabase.from("items").delete().eq("id", item.id);
@@ -164,24 +143,24 @@ export default function ItemDetailPage() {
     router.push(`/messages?u=${item.owner_id}`);
   }
 
-  if (!isLoaded) return <div><Header /><div className="container"><div className="centerNotice" style={{ marginTop: 24 }}>Loading...</div></div></div>;
-  if (!item) return <div><Header /><div className="container"><div className="centerNotice" style={{ marginTop: 24 }}>Item not found.</div></div></div>;
+  if (!isLoaded) return <div><Header /><div className="container"><div className="centerNotice containerPt24">Loading...</div></div></div>;
+  if (!item) return <div><Header /><div className="container"><div className="centerNotice containerPt24">Item not found.</div></div></div>;
 
   return (
     <div>
       <Header />
-      <div className="container" style={{ paddingTop: 24 }}>
-        <Link href="/items" style={{ fontSize: 13, color: "var(--text-muted)" }}>← Back to Browse</Link>
+      <div className="container containerPt24">
+        <Link href="/items" className="backLink">← Back to Browse</Link>
 
-        <div className="detailLayout" style={{ marginTop: 20 }}>
+        <div className="detailLayout detailLayoutSpaced">
           {/* Left: Image */}
-          <div style={{ position: "sticky", top: 80 }}>
+          <div className="detailGallerySticky">
             {item.photo_url
               ? <img src={item.photo_url} alt={item.name} className="detailMainImg" />
-              : <div className="detailMainImg" style={{ background: "#f1f5f9", display: "flex", alignItems: "center", justifyContent: "center", color: "#94a3b8", fontSize: 14 }}>No image</div>
+              : <div className="detailMainImg detailNoImg">No image</div>
             }
             {isOwner && editMode && (
-              <div className="field" style={{ marginTop: 12 }}>
+              <div className="field fieldMt">
                 <label className="label">Replace Photo</label>
                 <input type="file" accept="image/*" onChange={(e) => setNewPhotoFile(e.target.files?.[0] ?? null)} />
               </div>
@@ -191,17 +170,17 @@ export default function ItemDetailPage() {
           {/* Right: Info */}
           <div>
             {/* Category + Title */}
-            <div style={{ marginBottom: 16 }}>
-              {item.category_id && <p style={{ margin: "0 0 6px", fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--text-muted)" }}>{item.category_id}</p>}
+            <div className="detailMeta">
+              {item.category_id && <p className="detailCategory">{item.category_id}</p>}
               {editMode
-                ? <input value={name} onChange={(e) => setName(e.target.value)} style={{ fontSize: 24, fontWeight: 800, border: "1px solid var(--line)", borderRadius: 8, padding: "6px 10px", width: "100%" }} />
-                : <h1 style={{ fontSize: 26, fontWeight: 800, margin: 0, lineHeight: 1.2 }}>{item.name}</h1>
+                ? <input value={name} onChange={(e) => setName(e.target.value)} className="detailTitleInput" />
+                : <h1 className="detailH1">{item.name}</h1>
               }
-              <div style={{ display: "flex", gap: 8, marginTop: 10, flexWrap: "wrap", alignItems: "center" }}>
+              <div className="detailBadgeRow">
                 {item.condition && <span className={`badge ${CONDITION_COLORS[item.condition] ?? "badgeGray"}`}>{CONDITION_LABELS[item.condition] ?? item.condition}</span>}
                 {item.item_status === "rented" && <span className="badge badgeRed">Rented</span>}
                 {item.item_status === "available" && <span className="badge badgeGreen">Available</span>}
-                {item.available_quantity > 0 && <span style={{ fontSize: 12, color: "var(--text-muted)" }}>{item.available_quantity} available</span>}
+                {item.available_quantity > 0 && <span className="detailQtyLabel">{item.available_quantity} available</span>}
               </div>
             </div>
 
@@ -213,8 +192,8 @@ export default function ItemDetailPage() {
                   <tbody>
                     {specs.map((s) => (
                       <tr key={s.id}>
-                        <td style={{ padding: "4px 12px 4px 0", fontSize: 13, color: "var(--text-muted)", whiteSpace: "nowrap" }}>{s.spec_name}</td>
-                        <td style={{ padding: "4px 0", fontSize: 13, fontWeight: 500 }}>{s.spec_value}</td>
+                        <td className="specsTd">{s.spec_name}</td>
+                        <td className="specsTdVal">{s.spec_value}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -226,8 +205,8 @@ export default function ItemDetailPage() {
             {location && (
               <div className="detailSection">
                 <p className="detailSectionTitle">Location</p>
-                <p style={{ margin: 0, fontSize: 14 }}>{location.name}</p>
-                {location.building && <p style={{ margin: "2px 0 0", fontSize: 13, color: "var(--text-muted)" }}>{location.building} — {location.hours}</p>}
+                <p className="locationName">{location.name}</p>
+                {location.building && <p className="locationBuilding">{location.building} — {location.hours}</p>}
               </div>
             )}
 
@@ -238,19 +217,17 @@ export default function ItemDetailPage() {
                 <div className="sellerAvatar">
                   {(item.owner_name || item.owner_email || "U")[0].toUpperCase()}
                 </div>
-                <div style={{ flex: 1 }}>
+                <div className="sellerInfo">
                   <p className="sellerName">{item.owner_name || item.owner_email}</p>
                   <p className="sellerRating">
                     <Stars rating={sellerRating ?? 0} />{sellerRating ? `${sellerRating}/5` : "No ratings yet"}
                   </p>
                 </div>
-                {/* Message Seller button — only show if logged in and not the owner */}
                 {user && !isOwner && (
-                  <button onClick={handleMessageSeller} className="btn btnGhost btnSm" style={{ flexShrink: 0 }}>
+                  <button onClick={handleMessageSeller} className="btn btnGhost btnSm btnFlexShrink0">
                     💬 Message
                   </button>
                 )}
-                
               </div>
             </div>
 
@@ -258,7 +235,7 @@ export default function ItemDetailPage() {
             <div className="detailSection">
               <p className="detailSectionTitle">Pricing</p>
               {editMode ? (
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                <div className="pricingEditGrid">
                   {[["Daily Rate", dailyRate, setDailyRate], ["Weekly Rate", weeklyRate, setWeeklyRate], ["Semester Rate", semesterRate, setSemesterRate], ["Deposit", depositAmount, setDepositAmount]].map(([lbl, val, fn]) => (
                     <div className="field" key={lbl}>
                       <label className="label">{lbl}</label>
@@ -293,8 +270,8 @@ export default function ItemDetailPage() {
             <div className="detailSection">
               <p className="detailSectionTitle">Description</p>
               {editMode
-                ? <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={4} style={{ width: "100%", fontSize: 14 }} />
-                : <p style={{ margin: 0, fontSize: 14, lineHeight: 1.7, color: "var(--text-muted)" }}>{item.description || "No description provided."}</p>
+                ? <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={4} className="detailDescTextarea" />
+                : <p className="detailDescText">{item.description || "No description provided."}</p>
               }
             </div>
 
@@ -313,20 +290,19 @@ export default function ItemDetailPage() {
             )}
 
             {/* Actions */}
-            {message && <p className="messageText errorText" style={{ marginTop: 8 }}>{message}</p>}
+            {message && <p className="messageText errorText actionsMt8">{message}</p>}
 
             {!isOwner ? (
-              <div className="actions" style={{ marginTop: 20 }}>
+              <div className={`actions actionsMt`}>
                 <Link
                   href={item.item_status === "available" ? `/items/${item.id}/rent` : "#"}
-                  className={`btn btnPrimary btnLg${item.item_status !== "available" ? " disabled" : ""}`}
-                  style={{ flex: 1, justifyContent: "center", opacity: item.item_status !== "available" ? 0.5 : 1, pointerEvents: item.item_status !== "available" ? "none" : "auto" }}
+                  className={`btn btnPrimary btnLg rentBtnFull${item.item_status !== "available" ? " rentBtnUnavailable" : ""}`}
                 >
                   {item.item_status === "available" ? "Request to Rent" : "Currently Unavailable"}
                 </Link>
               </div>
             ) : (
-              <div className="actions" style={{ marginTop: 20 }}>
+              <div className="actions actionsMt">
                 {editMode ? (
                   <>
                     <button className="btn btnPrimary" onClick={saveEdit} disabled={busy}>

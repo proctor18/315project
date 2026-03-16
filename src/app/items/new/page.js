@@ -79,7 +79,7 @@ export default function NewItemPage() {
           owner_email: user.email ?? "",
           name: name.trim(),
           description: description.trim(),
-          price: Number(dailyRate) || 0,   // keep legacy price = daily rate
+          price: Number(dailyRate) || 0,
           status: "available",
           item_status: "available",
           category_id: categoryId || null,
@@ -115,8 +115,9 @@ export default function NewItemPage() {
   }
 
   return (
-    <div className="container">
+    <div>
       <Header />
+      <div className="container">
 
       <section className="pageHead">
         <div>
@@ -140,7 +141,7 @@ export default function NewItemPage() {
           </div>
 
           {/* Required Info */}
-          <h3 style={{ margin: "16px 0 8px" }}>Required Information</h3>
+          <h3 className="newItemFormTitle">Required Information</h3>
 
           <div className="field">
             <label className="label">Title</label>
@@ -184,9 +185,9 @@ export default function NewItemPage() {
           </div>
 
           {/* Pricing */}
-          <h3 style={{ margin: "16px 0 8px" }}>Pricing</h3>
+          <h3 className="newItemFormTitle">Pricing</h3>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          <div className="newItemPriceGrid">
             <div className="field">
               <label className="label">Daily Rate ($)</label>
               <input type="number" min="0" step="0.01" value={dailyRate}
@@ -209,7 +210,7 @@ export default function NewItemPage() {
             </div>
           </div>
 
-          <div className="actions" style={{ marginTop: 16 }}>
+          <div className="actions newItemActionsMt">
             <button type="submit" className="btn btnPrimary" disabled={saving}>
               {saving ? "Creating..." : "Rent Item"}
             </button>
@@ -223,6 +224,7 @@ export default function NewItemPage() {
           {message}
         </p>
       ) : null}
+      </div>
     </div>
   );
 }

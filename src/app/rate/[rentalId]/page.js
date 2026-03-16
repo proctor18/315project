@@ -20,13 +20,11 @@ export default function RateSellerPage() {
   useEffect(() => {
     const fetchRental = async () => {
       if (!rentalId) return;
-
       const { data } = await supabase
         .from("rental_transactions")
         .select(`id, renter_id, status, items!inner(owner_id)`)
         .eq("id", rentalId)
         .single();
-
       if (!data) setMessage("Rental not found.");
       else setRental(data);
     };
@@ -36,21 +34,12 @@ export default function RateSellerPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage("");
-
     if (!rental || !user) return;
-    if (rental.renter_id !== user.id) {
-      setMessage("Only the renter can rate this rental.");
-      return;
-    }
-    if (!rating) {
-      setMessage("Please select a rating.");
-      return;
-    }
-
+    if (rental.renter_id !== user.id) { setMessage("Only the renter can rate this rental."); return; }
+    if (!rating) { setMessage("Please select a rating."); return; }
     setSubmitting(true);
-
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("ratings")
         .insert([{
           rental_id: rental.id,
@@ -61,12 +50,8 @@ export default function RateSellerPage() {
           created_at: new Date().toISOString(),
         }])
         .select();
-
       if (error) setMessage("Failed to submit rating.");
-      else {
-        setMessage("Rating submitted successfully!");
-        //router.push("/");
-      }
+      else setMessage("Rating submitted successfully!");
     } catch {
       setMessage("Unexpected error submitting rating.");
     } finally {
@@ -79,15 +64,15 @@ export default function RateSellerPage() {
   return (
     <div>
       <Header />
-      <div style={{ maxWidth: 500, margin: "0 auto", padding: 24 }}>
-        <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 16 }}>Rate Your Experience</h1>
+      <div className="rateWrapper">
+        <h1 className="rateH1">Rate Your Experience</h1>
         <form onSubmit={handleSubmit}>
-          <label style={{ display: "block", marginBottom: 8 }}>
+          <label className="rateLabel">
             Rating:
             <select
               value={rating}
               onChange={(e) => setRating(Number(e.target.value))}
-              style={{ display: "block", width: "100%", marginTop: 4, marginBottom: 16 }}
+              className="rateSelect"
             >
               <option value={0}>Select rating</option>
               {[1, 2, 3, 4, 5].map(n => (
@@ -96,36 +81,26 @@ export default function RateSellerPage() {
             </select>
           </label>
 
-          <label style={{ display: "block", marginBottom: 16 }}>
+          <label className="rateLabelReview">
             Review (optional):
             <textarea
               value={review}
               onChange={(e) => setReview(e.target.value)}
               rows={4}
-              style={{ display: "block", width: "100%", marginTop: 4 }}
+              className="rateTextarea"
             />
           </label>
 
           <button
             type="submit"
             disabled={submitting}
-            style={{
-              display: "block",
-              width: "100%",
-              padding: 12,
-              fontWeight: 700,
-              backgroundColor: "#000",
-              color: "#fff",
-              border: "none",
-              borderRadius: 6,
-              cursor: "pointer",
-            }}
+            className="rateSubmitBtn"
           >
             {submitting ? "Submitting..." : "Submit Rating"}
           </button>
 
           {message && (
-            <p style={{ marginTop: 12, color: message.includes("success") ? "green" : "red" }}>
+            <p className={`rateMessage ${message.includes("success") ? "rateMessageSuccess" : "rateMessageError"}`}>
               {message}
             </p>
           )}

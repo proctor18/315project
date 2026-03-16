@@ -65,27 +65,19 @@ export default function HomePage() {
     <div>
       <Header />
       <div className="container">
-        {/* Hero */}
-        <section style={{
-          background: "#000", color: "#fff",
-          borderRadius: 16, padding: "48px 40px",
-          margin: "24px 0 32px",
-          backgroundImage: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
-        }}>
-          <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", opacity: 0.6, margin: "0 0 10px" }}>
-            Student Rental Platform
-          </p>
-          <h1 style={{ fontSize: "clamp(28px,4vw,44px)", fontWeight: 900, margin: "0 0 12px", letterSpacing: "-0.03em", lineHeight: 1.1 }}>
+        <section className="hero">
+          <p className="heroEyebrow">Student Rental Platform</p>
+          <h1 className="heroH1">
             Rent what you need,<br />list what you have.
           </h1>
-          <p style={{ opacity: 0.7, fontSize: 15, margin: "0 0 24px", maxWidth: 480 }}>
+          <p className="heroSubtitle">
             Textbooks, laptops, calculators and lab equipment — available across all campus locations.
           </p>
-          <div style={{ display: "flex", gap: 10 }}>
-            <Link href="/locations" className="btn btnPrimary" style={{ background: "#fff", color: "#000" }}>
+          <div className="heroBtns">
+            <Link href="/locations" className="btn btnPrimary heroBtnLocations">
               Browse Locations
             </Link>
-            <Link href="/items/new" className="btn btnGhost" style={{ border: "1px solid rgba(255,255,255,0.3)", color: "#fff" }}>
+            <Link href="/items/new" className="btn btnGhost heroBtnList">
               List an Item
             </Link>
           </div>
@@ -109,7 +101,7 @@ export default function HomePage() {
           <div className="centerNotice">Loading items...</div>
         ) : errorMessage ? (
           <div className="centerNotice">
-            <p className="errorText" style={{ margin: 0 }}>Failed to load items: {errorMessage}</p>
+            <p className="errorText">{`Failed to load items: ${errorMessage}`}</p>
           </div>
         ) : visibleItems.length === 0 ? (
           <div className="centerNotice">

@@ -15,7 +15,6 @@ const SIDEBAR_LINKS = [
   { href: "/my-rentals", label: "My Rentals" },
 ];
 
-
 function fmtDate(s) {
   if (!s) return "—";
   return new Date(s).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" });
@@ -28,9 +27,9 @@ export default function MyItemsPage() {
   const { user, loading } = useAuth();
   const pathname = usePathname();
   const [items, setItems] = useState([]);
-  const [requests, setRequests] = useState([]); // pending rental requests on my items
+  const [requests, setRequests] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [tab, setTab] = useState("listings"); // listings | requests
+  const [tab, setTab] = useState("listings");
   const [busy, setBusy] = useState("");
 
   async function load() {
@@ -38,7 +37,6 @@ export default function MyItemsPage() {
     const itemsRes = await supabase.from("items").select("*").eq("owner_id", user.id).order("created_at", { ascending: false });
     const myItems = itemsRes.data ?? [];
     setItems(myItems);
-
     if (myItems.length > 0) {
       const myItemIds = myItems.map((i) => i.id);
       const reqRes = await supabase
@@ -58,9 +56,7 @@ export default function MyItemsPage() {
 
   async function handleApprove(rental) {
     setBusy(rental.id);
-    // Activate the rental
     await supabase.from("rental_transactions").update({ status: "active" }).eq("id", rental.id);
-    // Reduce available quantity on item
     const item = items.find((i) => String(i.id) === String(rental.item_id));
     if (item) {
       const avail = Math.max(0, (item.available_quantity || 1) - 1);
@@ -69,7 +65,6 @@ export default function MyItemsPage() {
         item_status: avail <= 0 ? "rented" : "available",
       }).eq("id", item.id);
     }
-    // Notify renter via message
     await supabase.from("messages").insert({
       sender_id: user.id,
       recipient_id: rental.renter_id,
@@ -81,9 +76,7 @@ export default function MyItemsPage() {
 
   async function handleDecline(rental) {
     setBusy(rental.id);
-    // Mark as cancelled/denied
     await supabase.from("rental_transactions").update({ status: "cancelled" }).eq("id", rental.id);
-    // Notify renter via message
     await supabase.from("messages").insert({
       sender_id: user.id,
       recipient_id: rental.renter_id,
@@ -95,14 +88,13 @@ export default function MyItemsPage() {
 
   const activeItems = items.filter((i) => i.item_status !== "rented" && i.status !== "unavailable");
   const pastItems = items.filter((i) => i.item_status === "rented" || i.status === "unavailable");
-  const displayedItems = tab === "listings-active" ? activeItems : tab === "listings-past" ? pastItems : activeItems;
 
   return (
     <div>
       <Header />
       <div className="accountLayout">
         <aside className="accountSidebar">
-          <div className="sidebarUser" style={{ padding: "20px 20px 16px" }}>
+          <div className="sidebarUser sidebarUserSlim">
             <p className="sidebarName">{user?.email ?? "Account"}</p>
           </div>
           <ul className="sidebarNav">
@@ -120,7 +112,6 @@ export default function MyItemsPage() {
             <Link href="/items/new" className="btn btnPrimary">+ Post Item</Link>
           </div>
 
-          {/* Tabs */}
           <div className="tabs">
             <button className={`tab${tab === "listings" ? " tabActive" : ""}`} onClick={() => setTab("listings")}>
               My Listings
@@ -128,7 +119,7 @@ export default function MyItemsPage() {
             </button>
             <button className={`tab${tab === "requests" ? " tabActive" : ""}`} onClick={() => setTab("requests")}>
               Rental Requests
-              {requests.length > 0 && <span className="tabBadge" style={{ background: "#ef4444" }}>{requests.length}</span>}
+              {requests.length > 0 && <span className={`tabBadge tabBadgeRed`}>{requests.length}</span>}
             </button>
           </div>
 
@@ -138,8 +129,7 @@ export default function MyItemsPage() {
             <div className="centerNotice">Please <Link href="/login">log in</Link>.</div>
           ) : tab === "listings" || tab === "listings-past" ? (
             <>
-              {/* Sub-tabs for active/past */}
-              <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
+              <div className="requestsSubTabRow">
                 <button
                   className={`btn btnSm${tab === "listings" ? " btnPrimary" : " btnGhost"}`}
                   onClick={() => setTab("listings")}
@@ -162,49 +152,42 @@ export default function MyItemsPage() {
               )}
             </>
           ) : (
-            /* Rental Requests Tab */
             requests.length === 0 ? (
-              <div className="centerNotice" style={{ marginTop: 32 }}>
-                <p style={{ fontSize: 15, marginBottom: 8 }}>No pending rental requests.</p>
-                <p style={{ fontSize: 13, color: "var(--text-muted)" }}>When a student requests to rent one of your items, it will appear here.</p>
+              <div className="centerNotice requestsEmptyMt">
+                <p className="requestsEmptyTitle">No pending rental requests.</p>
+                <p className="requestsEmptySubtitle">When a student requests to rent one of your items, it will appear here.</p>
               </div>
             ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: 14, marginTop: 4 }}>
+              <div className="requestsList">
                 {requests.map((req) => (
-                  <div key={req.id} style={{ border: "1px solid var(--line)", borderRadius: 12, padding: "16px 20px", background: "var(--surface)" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, flexWrap: "wrap" }}>
-                      <div style={{ flex: 1 }}>
-                        <p style={{ margin: "0 0 4px", fontWeight: 700, fontSize: 15 }}>{req.items?.name ?? `Item #${req.item_id}`}</p>
-                        <p style={{ margin: "0 0 2px", fontSize: 13, color: "var(--text-muted)" }}>
-                          Rental ID: <strong>{req.id}</strong>
-                        </p>
-                        <p style={{ margin: "0 0 2px", fontSize: 13, color: "var(--text-muted)" }}>
+                  <div key={req.id} className="requestCard">
+                    <div className="requestCardRow">
+                      <div className="requestCardInfo">
+                        <p className="requestCardName">{req.items?.name ?? `Item #${req.item_id}`}</p>
+                        <p className="requestCardMeta">Rental ID: <strong>{req.id}</strong></p>
+                        <p className="requestCardMeta">
                           Period: <strong>{fmtDate(req.start_date)}</strong> → <strong>{fmtDate(req.expected_return_date)}</strong>
                         </p>
-                        <p style={{ margin: "0 0 2px", fontSize: 13, color: "var(--text-muted)" }}>
-                          Type: <strong style={{ textTransform: "capitalize" }}>{req.rental_type}</strong> · {req.num_days} days
+                        <p className="requestCardMeta">
+                          Type: <strong className="requestTypeCapitalize">{req.rental_type}</strong> · {req.num_days} days
                         </p>
-                        <p style={{ margin: "0 0 8px", fontSize: 14, fontWeight: 700, color: "var(--text)" }}>
-                          Total: {fmtPrice(req.total_cost)}
-                        </p>
+                        <p className="requestCardTotal">Total: {fmtPrice(req.total_cost)}</p>
                         <Link href={`/messages?u=${req.renter_id}`} className="btn btnGhost btnSm">
                           💬 Message Renter
                         </Link>
                       </div>
-                      <div style={{ display: "flex", flexDirection: "column", gap: 8, flexShrink: 0 }}>
+                      <div className="requestCardActions">
                         <button
-                          className="btn btnPrimary"
+                          className="btn btnPrimary requestCardBtn"
                           onClick={() => handleApprove(req)}
                           disabled={busy === req.id}
-                          style={{ minWidth: 110 }}
                         >
                           {busy === req.id ? "Processing..." : "✓ Approve"}
                         </button>
                         <button
-                          className="btn btnDanger"
+                          className="btn btnDanger requestCardBtn"
                           onClick={() => handleDecline(req)}
                           disabled={busy === req.id}
-                          style={{ minWidth: 110 }}
                         >
                           ✕ Decline
                         </button>

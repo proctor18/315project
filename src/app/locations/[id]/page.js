@@ -48,9 +48,9 @@ export default function LocationItemsPage() {
   return (
     <div>
       <Header />
-      <div className="container" style={{ paddingTop: 24 }}>
-        <Link href="/locations" style={{ fontSize: 13, color: "var(--text-muted)" }}>← All Locations</Link>
-        <div className="pageHead" style={{ marginTop: 12 }}>
+      <div className="container containerPt24">
+        <Link href="/locations" className="backLink">← All Locations</Link>
+        <div className="pageHead pageHeadMt">
           <div>
             <h1 className="pageTitle">{loc?.name ?? "Location"}</h1>
             <p className="pageSubtitle">{loc ? `${loc.building} · ${loc.hours}` : ""}</p>
@@ -65,13 +65,13 @@ export default function LocationItemsPage() {
         </div>
 
         {/* Extra filters */}
-        <div style={{ display: "flex", gap: 10, marginBottom: 20, alignItems: "center" }}>
-          <select value={cond} onChange={(e) => setCond(e.target.value)} style={{ width: "auto", padding: "6px 10px" }}>
+        <div className="locationFilterRow">
+          <select value={cond} onChange={(e) => setCond(e.target.value)} className="locationCondSelect">
             {CONDS.map((c) => <option key={c.v} value={c.v}>{c.l}</option>)}
           </select>
           <input type="number" min="0" placeholder="Max daily rate $" value={maxPrice}
             onChange={(e) => setMaxPrice(e.target.value)}
-            style={{ width: 160, padding: "6px 10px" }} />
+            className="locationMaxInput" />
           {(cat || cond || maxPrice) && (
             <button className="btn btnGhost btnSm" onClick={() => { setCat(""); setCond(""); setMaxPrice(""); }}>Clear filters</button>
           )}

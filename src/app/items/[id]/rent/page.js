@@ -25,7 +25,7 @@ export default function RentPage() {
 
   const [item, setItem] = useState(null);
   const [locations, setLocations] = useState([]);
-  const [savedCards, setSavedCards] = useState([]);   // ← saved payment methods
+  const [savedCards, setSavedCards] = useState([]);
   const [loaded, setLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -36,14 +36,14 @@ export default function RentPage() {
   const [rentalType, setRentalType] = useState("daily");
   const [pickupLoc, setPickupLoc] = useState("");
   const [returnLoc, setReturnLoc] = useState("");
-  const [selectedCardId, setSelectedCardId] = useState(""); // ← selected payment_method_id
+  const [selectedCardId, setSelectedCardId] = useState("");
 
   useEffect(() => {
     if (!id || !user) return;
     Promise.all([
       supabase.from("items").select("*").eq("id", id).maybeSingle(),
       supabase.from("locations").select("*").eq("status", "active"),
-      supabase.from("payment_methods").select("*").eq("user_id", user.id), // ← fetch saved cards
+      supabase.from("payment_methods").select("*").eq("user_id", user.id),
     ]).then(([ir, lr, pr]) => {
       setItem(ir.data ?? null);
       const locs = lr.data ?? [];
@@ -54,7 +54,6 @@ export default function RentPage() {
       }
       const cards = pr.data ?? [];
       setSavedCards(cards);
-      // Auto-select first card if available
       if (cards.length > 0) setSelectedCardId(cards[0].id);
       setLoaded(true);
     });
@@ -97,18 +96,15 @@ export default function RentPage() {
         deposit_amount: deposit,
         location_change_fee: locationFee,
         total_cost: total,
-        payment_method_id: selectedCardId, // ← FK to payment_methods
+        payment_method_id: selectedCardId,
         status: "pending",
       });
       if (error) throw error;
-
-      // Notify seller
       await supabase.from("messages").insert({
         sender_id: user.id,
         recipient_id: item.owner_id,
         body: `📦 Rental request for "${item.name}" (ID: ${rentalId}) from ${startDate} to ${returnDate}. Please go to My Listed Items → Rental Requests to approve or decline.`,
       });
-
       router.push(`/rentals/${rentalId}`);
     } catch (err) {
       setMessage(err instanceof Error ? err.message : "Failed to submit.");
@@ -116,21 +112,21 @@ export default function RentPage() {
     }
   }
 
-  if (!loaded) return <div><Header /><div className="container"><div className="centerNotice" style={{ marginTop: 24 }}>Loading...</div></div></div>;
-  if (!item) return <div><Header /><div className="container"><div className="centerNotice" style={{ marginTop: 24 }}>Item not found.</div></div></div>;
+  if (!loaded) return <div><Header /><div className="container"><div className="centerNotice containerPt24">Loading...</div></div></div>;
+  if (!item) return <div><Header /><div className="container"><div className="centerNotice containerPt24">Item not found.</div></div></div>;
 
   return (
     <div>
       <Header />
-      <div className="container" style={{ paddingTop: 24 }}>
-        <Link href={`/items/${id}`} style={{ fontSize: 13, color: "var(--text-muted)" }}>← Back to item</Link>
+      <div className="container containerPt24">
+        <Link href={`/items/${id}`} className="backLink">← Back to item</Link>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 440px", gap: 24, marginTop: 20, alignItems: "start" }}>
+        <div className="rentPageGrid">
           {/* Item Image */}
           <div>
             {item.photo_url
-              ? <img src={item.photo_url} alt={item.name} style={{ width: "100%", borderRadius: 14, border: "1px solid var(--line)", aspectRatio: "4/3", objectFit: "cover" }} />
-              : <div style={{ width: "100%", aspectRatio: "4/3", background: "#f1f5f9", borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", color: "#94a3b8" }}>No image</div>}
+              ? <img src={item.photo_url} alt={item.name} className="rentItemImg" />
+              : <div className="rentItemNoImg">No image</div>}
           </div>
 
           {/* Form */}
@@ -139,19 +135,19 @@ export default function RentPage() {
               <div className="rentFormHeader">Rent Item Details</div>
               <div className="rentFormBody">
                 {/* Item summary */}
-                <div style={{ marginBottom: 20 }}>
-                  <p style={{ margin: "0 0 4px", fontWeight: 700, fontSize: 15 }}>{item.name}</p>
+                <div className="rentItemSummary">
+                  <p className="rentItemName">{item.name}</p>
                   <p className="meta">Condition: {item.condition?.replace("_", " ") ?? "—"}</p>
                   <p className="meta">Seller: {item.owner_name || item.owner_email}</p>
                 </div>
 
                 <form onSubmit={handleSubmit}>
-                  <p style={{ fontSize: 12, color: "var(--danger)", margin: "0 0 14px" }}>Required fields must be filled out</p>
+                  <p className="rentRequiredNote">Required fields must be filled out</p>
 
                   {/* Rental Period */}
                   <div className="rentFormSection">
                     <p className="rentFormSectionTitle">Rental Period</p>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                    <div className="rentDateGrid">
                       <div className="field">
                         <label className="label">Start Date</label>
                         <input type="date" value={startDate} min={today} onChange={(e) => setStartDate(e.target.value)} required />
@@ -163,10 +159,10 @@ export default function RentPage() {
                     </div>
                     <div className="field">
                       <label className="label">Rental Type</label>
-                      <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
+                      <div className="rentTypeRow">
                         {["daily", "weekly", "monthly", "semester"].map((t) => (
-                          <label key={t} style={{ display: "inline-flex", alignItems: "center", gap: 6, cursor: "pointer", fontSize: 13, fontWeight: 500, whiteSpace: "nowrap" }}>
-                            <input type="radio" name="type" value={t} checked={rentalType === t} onChange={() => setRentalType(t)} style={{ width: 16, height: 16, margin: 0, padding: 0, flexShrink: 0 }} />
+                          <label key={t} className="rentTypeLabel">
+                            <input type="radio" name="type" value={t} checked={rentalType === t} onChange={() => setRentalType(t)} className="rentTypeRadio" />
                             {t.charAt(0).toUpperCase() + t.slice(1)}
                           </label>
                         ))}
@@ -191,7 +187,7 @@ export default function RentPage() {
                         <option value="">Select location</option>
                         {locations.map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
                       </select>
-                      {locationFee > 0 && <p className="meta" style={{ color: "var(--warning)", marginTop: 4 }}>⚠ $10 cross-location fee applies</p>}
+                      {locationFee > 0 && <p className="meta rentLocationWarning">⚠ $10 cross-location fee applies</p>}
                     </div>
                   </div>
 
@@ -204,32 +200,35 @@ export default function RentPage() {
                     <div className="costRowTotal"><span>Total</span><span>{fmtPrice(total)}</span></div>
                   </div>
 
-                  {/* Payment Method — saved cards */}
+                  {/* Payment Method */}
                   <div className="rentFormSection">
                     <p className="rentFormSectionTitle">Payment Method</p>
                     {savedCards.length === 0 ? (
-                      <p className="meta" style={{ color: "var(--danger)" }}>
+                      <p className="meta rentNoCardWarning">
                         No saved cards. <Link href="/payment-methods">Add a payment method</Link> before renting.
                       </p>
                     ) : (
                       <>
                         {savedCards.map((card) => (
-                          <label key={card.id} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10, cursor: "pointer", padding: "10px 12px", border: `1px solid ${selectedCardId === card.id ? "var(--primary, #000)" : "var(--line, #e2e8f0)"}`, borderRadius: 8, fontSize: 13 }}>
+                          <label
+                            key={card.id}
+                            className={`rentCardLabel ${selectedCardId === card.id ? "rentCardLabelSelected" : "rentCardLabelUnselected"}`}
+                          >
                             <input
                               type="radio"
                               name="paymentCard"
                               value={card.id}
                               checked={selectedCardId === card.id}
                               onChange={() => setSelectedCardId(card.id)}
-                              style={{ width: 16, height: 16, margin: 0, flexShrink: 0 }}
+                              className="rentCardRadio"
                             />
                             <span>
                               <strong>{card.card_type}</strong> ending in {card.card_number?.slice(-4)}
-                              <span style={{ color: "var(--text-muted)", marginLeft: 8 }}>Exp: {card.expiry}</span>
+                              <span className="rentCardExpiry">Exp: {card.expiry}</span>
                             </span>
                           </label>
                         ))}
-                        <Link href="/payment-methods" style={{ fontSize: 12, color: "var(--text-muted)" }}>
+                        <Link href="/payment-methods" className="rentManageLink">
                           + Manage payment methods
                         </Link>
                       </>
@@ -238,18 +237,17 @@ export default function RentPage() {
 
                   <button
                     type="submit"
-                    className="btn btnPrimary"
-                    style={{ width: "100%" }}
+                    className="btn btnPrimary rentSubmitBtn"
                     disabled={saving || !user || savedCards.length === 0}
                   >
                     {saving ? "Processing..." : "Request to Rent"}
                   </button>
                   {!user && (
-                    <p className="meta" style={{ color: "var(--danger)", marginTop: 8, textAlign: "center" }}>
+                    <p className="meta rentLoginNote">
                       Please <Link href="/login">log in</Link> to rent.
                     </p>
                   )}
-                  {message && <p className="messageText errorText" style={{ marginTop: 8 }}>{message}</p>}
+                  {message && <p className="messageText errorText actionsMt8">{message}</p>}
                 </form>
               </div>
             </div>

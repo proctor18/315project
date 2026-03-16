@@ -30,7 +30,7 @@ export default function Header() {
           <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search items..." />
         </form>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 2, marginLeft: "auto", flexShrink: 0 }}>
+        <div className="navActions">
           <Link href="/locations" className={nc("/locations")}>Locations</Link>
           <Link href="/items" className={nc("/items")}>Browse</Link>
 
@@ -40,27 +40,12 @@ export default function Header() {
               <Link href="/my-items" className={nc("/my-items")}>Listed</Link>
               <Link href="/messages" className={nc("/messages")}>Messages</Link>
               {isAdmin && (
-                <Link href="/admin" className={nc("/admin")} style={{ marginLeft: 4, color: "rgba(255,255,255,0.6)", fontSize: 12 }}>Admin</Link>
+                <Link href="/admin" className={`${nc("/admin")} navLinkAdmin`}>Admin</Link>
               )}
-              <Link href="/profile" className={nc("/profile")} style={{ //put style in css  
-                marginLeft: 8,
-                background: "rgba(255,255,255,0.12)",
-                border: "1px solid rgba(255,255,255,0.22)",
-                borderRadius: 7,
-                padding: "4px 14px",
-                color: "#fff",
-              }}>Account</Link>
+              <Link href="/profile" className={`${nc("/profile")} navLinkAccount`}>Account</Link>
             </>
           ) : (
-            <Link href="/login" style={{ //put style in css  
-              marginLeft: 8,
-              background: "#fff",
-              color: "#000",
-              borderRadius: 7,
-              padding: "5px 16px",
-              fontWeight: 700,
-              fontSize: 13,
-            }}>Login</Link>
+            <Link href="/login" className="navLinkLogin">Login</Link>
           )}
         </div>
       </nav>
