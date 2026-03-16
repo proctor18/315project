@@ -109,7 +109,7 @@ export default function MyItemsPage() {
         <div className="accountContent">
           <div className="pageHead">
             <h1 className="pageTitle">My Listed Items</h1>
-            <Link href="/items/new" className="btn btnPrimary">+ Post Item</Link>
+            <Link href="/items/new" className="btn btnGhost">+ Post Item</Link>
           </div>
 
           <div className="tabs">
@@ -131,11 +131,11 @@ export default function MyItemsPage() {
             <>
               <div className="requestsSubTabRow">
                 <button
-                  className={`btn btnSm${tab === "listings" ? " btnPrimary" : " btnGhost"}`}
+                  className={`btn btnPrimary btnSm${tab === "listings" ? " btnPrimary" : " btnPrimary"}`}
                   onClick={() => setTab("listings")}
                 >Active ({activeItems.length})</button>
                 <button
-                  className={`btn btnSm${tab === "listings-past" ? " btnPrimary" : " btnGhost"}`}
+                  className={`btn btnSm${tab === "listings-past" ? " btnPrimary" : " btnPrimary"}`}
                   onClick={() => setTab("listings-past")}
                 >Rented Out ({pastItems.length})</button>
               </div>

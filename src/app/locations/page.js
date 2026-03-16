@@ -38,7 +38,7 @@ export default function LocationsPage() {
                   <p className="meta locationHours">🕐 {loc.hours}</p>
                   {loc.contact_email && <p className="meta">✉ {loc.contact_email}</p>}
                   <div className="locationBrowseWrap">
-                    <span className="btn btnPrimary btnSm">Browse items →</span>
+                    <span className="btn btnGhost btnSm">Browse items →</span>
                   </div>
                 </Link>
               ))}

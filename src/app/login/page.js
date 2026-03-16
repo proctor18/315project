@@ -58,7 +58,6 @@ export default function LoginPage() {
         <div className="loginWrapper">
           {/* Logo */}
           <div className="loginLogoWrap">
-            <div className="loginLogo">RENTIFY</div>
             <h1 className="loginHeading">
               {mode === "signup" ? "Create an account" : "Welcome back"}
             </h1>

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function Header() {
   const pathname = usePathname();
@@ -19,6 +20,16 @@ export default function Header() {
   function handleSearch(e) {
     e.preventDefault();
     if (search.trim()) router.push(`/items?q=${encodeURIComponent(search.trim())}`);
+  }
+  async function logout() {
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      console.error(error.message);
+      return;
+    }
+
+    router.push("/login");
   }
 
   return (
@@ -43,6 +54,9 @@ export default function Header() {
                 <Link href="/admin" className={`${nc("/admin")} navLinkAdmin`}>Admin</Link>
               )}
               <Link href="/profile" className={`${nc("/profile")} navLinkAccount`}>Account</Link>
+              <button onClick={logout} className="navLinkLogout">
+                Logout
+              </button>
             </>
           ) : (
             <Link href="/login" className="navLinkLogin">Login</Link>

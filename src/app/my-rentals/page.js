@@ -119,8 +119,8 @@ export default function MyRentalsPage() {
                           </p>
                         )}
                         <div className="rentalActions">
-                          <Link href={`/rentals/${r.id}`} className="btn btnGhost btnSm">View Receipt</Link>
-                          <Link href={`/rate/${r.id}`} className="btn btnGhost btnSm">Rate Seller</Link>
+                          <Link href={`/rentals/${r.id}`} className="btn btnPrimary btnSm">View Receipt</Link>
+                          <Link href={`/rate/${r.id}`} className="btn btnPrimary btnSm">Rate Seller</Link>
                           {r.status === "returned" && item && (
                             <Link href={`/items/${r.item_id}`} className="btn btnGhost btnSm">Rent Again</Link>
                           )}
