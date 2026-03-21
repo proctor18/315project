@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Header from "@/components/Header";
 import ItemCard from "@/components/ItemCard";
+import Footer from "@/components/Footer";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabaseClient";
 
@@ -33,10 +34,13 @@ type Item = {
 
 export default function HomePage() {
   const { user, loading } = useAuth();
+  
   const [items, setItems] = useState<Item[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [categoryFilter, setCategoryFilter] = useState("");
+
+  
 
   useEffect(() => {
     let cancelled = false;
@@ -115,6 +119,7 @@ export default function HomePage() {
           </div>
         )}
       </div>
+      <Footer/>
     </div>
   );
 }

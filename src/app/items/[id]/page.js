@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import Header from "@/components/Header";
+
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabaseClient";
 import { sanitizeFileName, validateImageFile } from "@/lib/fileHelpers";
@@ -312,7 +313,7 @@ export default function ItemDetailPage() {
                   </>
                 ) : (
                   <>
-                    <button className="btn btnGhost" onClick={() => setEditMode(true)}>Edit Item</button>
+                    <button className="btn btnPrimary" onClick={() => setEditMode(true)}>Edit Item</button>
                     <button className="btn btnDanger" onClick={deleteItem} disabled={busy}>Delete</button>
                   </>
                 )}
@@ -321,6 +322,7 @@ export default function ItemDetailPage() {
           </div>
         </div>
       </div>
+      
     </div>
   );
 }

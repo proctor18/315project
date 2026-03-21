@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/context/AuthContext";
 
@@ -139,6 +140,7 @@ export default function AdminDashboardPage() {
           </div>
         )}
       </AdminLayout>
+      <Footer/>
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import ItemCard from "@/components/ItemCard";
 import { supabase } from "@/lib/supabaseClient";
 
@@ -46,7 +47,7 @@ export default function LocationItemsPage() {
   }, [id, cat, cond, maxPrice]);
 
   return (
-    <div>
+    <main>
       <Header />
       <div className="container containerPt24">
         <Link href="/locations" className="backLink">← All Locations</Link>
@@ -85,6 +86,9 @@ export default function LocationItemsPage() {
             </div>
           )}
       </div>
-    </div>
+      <Footer/>
+    </main>
+    
+    
   );
 }

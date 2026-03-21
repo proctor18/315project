@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import { AdminLayout } from "../page.js";
 import { supabase } from "@/lib/supabaseClient";
 
@@ -89,7 +90,7 @@ export default function AdminLocationsPage() {
                   <span className={`badge ${loc.status === "active" ? "badgeGreen" : "badgeGray"}`}>{loc.status}</span>
                 </div>
                 <div className="actions">
-                  <button className="btn btnGhost btnSm" onClick={() => { setEditing(loc); setForm({ ...loc }); }}>Edit</button>
+                  <button className="btn btnPrimary btnSm" onClick={() => { setEditing(loc); setForm({ ...loc }); }}>Edit</button>
                   <button className="btn btnGhost btnSm" onClick={async () => {
                     await supabase.from("locations").update({ status: loc.status === "active" ? "inactive" : "active" }).eq("id", loc.id);
                     load();
@@ -101,6 +102,7 @@ export default function AdminLocationsPage() {
             ))}
         </div>
       </AdminLayout>
+      <Footer/>
     </div>
   );
 }

@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import { AdminLayout } from "../page.js";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/context/AuthContext";
@@ -308,7 +309,7 @@ export default function AdminItemsPage() {
                   </td>
                   <td>
                     <div className="adminItemActions">
-                      <button className="btn btnGhost btnSm" onClick={() => startEdit(item)}>Edit</button>
+                      <button className="btn btnPrimary btnSm" onClick={() => startEdit(item)}>Edit</button>
                       <button className="adminBtnDanger" onClick={() => deleteItem(item)}>Delete</button>
                     </div>
                   </td>
@@ -318,6 +319,7 @@ export default function AdminItemsPage() {
           </table>
         </div>
       </AdminLayout>
+      <Footer/>
     </div>
   );
 }

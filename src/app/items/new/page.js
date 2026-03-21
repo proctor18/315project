@@ -218,6 +218,7 @@ export default function NewItemPage() {
           </div>
         </form>
       )}
+      
 
       {message ? (
         <p className={`messageText ${message.toLowerCase().includes("failed") ? "errorText" : ""}`}>
@@ -225,6 +226,7 @@ export default function NewItemPage() {
         </p>
       ) : null}
       </div>
+      
     </div>
   );
 }

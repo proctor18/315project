@@ -260,6 +260,8 @@ export default function RentPage() {
           </div>
         </div>
       </div>
+      
     </div>
+    
   );
 }

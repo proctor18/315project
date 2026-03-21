@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import { AdminLayout } from "../page.js";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/context/AuthContext";
@@ -326,6 +327,7 @@ export default function AdminRentalsPage() {
         )}
 
       </AdminLayout>
+      <Footer/>
     </div>
   );
 }

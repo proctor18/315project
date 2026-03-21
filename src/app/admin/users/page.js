@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import { AdminLayout } from "../page.js";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/context/AuthContext";
@@ -66,6 +67,7 @@ export default function AdminUsersPage() {
           </table>
         </div>
       </AdminLayout>
+      <Footer/>
     </div>
   );
 }

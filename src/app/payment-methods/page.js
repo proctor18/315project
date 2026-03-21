@@ -205,7 +205,7 @@ export default function PaymentMethods() {
                 <p>{card.cardName}</p>
                 <p>Expires: {card.expiry}</p>
                 <div className="actions paymentCardActionsMt">
-                  <button className="btn btnGhost btnSm" onClick={() => handleEdit(index)}>Edit</button>
+                  <button className="btn btnPrimary btnSm" onClick={() => handleEdit(index)}>Edit</button>
                   <button className="btn btnDanger btnSm" onClick={() => handleDelete(index)}>Delete</button>
                 </div>
               </div>
