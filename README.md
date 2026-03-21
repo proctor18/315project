@@ -96,7 +96,9 @@ You can register a new account from the `/login` page, or use one of the followi
 | Role | Email | Password |
 
 | Admin | admin@macewan.ca | 11111111 |
+
 | Student | kw@macewan.ca | 11111111 |
+
 | Student | mc@macewan.ca | 11111111 |
 
 ---
