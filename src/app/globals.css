@@ -2404,3 +2404,194 @@ textarea {
   background: #A0001C;
 
 }
+
+
+/* Admin Items Page */
+.adminItemsFilterRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.adminItemsSearch {
+  padding: 8px 12px;
+  border: 1.5px solid var(--border, #e0e0e0);
+  border-radius: 7px;
+  font-size: 14px;
+  outline: none;
+  width: 300px;
+  height: 36px;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+
+.adminItemsSearch:focus {
+  border-color: var(--primary, #A0001C);
+}
+
+.adminItemsSelect {
+  padding: 0 10px;
+  height: 36px;
+  border: 1.5px solid var(--border, #e0e0e0);
+  border-radius: 7px;
+  font-size: 14px;
+  outline: none;
+  background: var(--surface, #fff);
+  color: var(--text, #111);
+  cursor: pointer;
+  width: auto;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+
+.adminItemsSelect:focus {
+  border-color: var(--primary, #A0001C);
+}
+
+.adminItemsClearBtn {
+  height: 36px;
+  padding: 0 12px;
+  box-sizing: border-box;
+}
+
+.adminItemsCount {
+  font-size: 0.85rem;
+  opacity: 0.6;
+  white-space: nowrap;
+  margin-left: auto;
+}
+
+.adminItemThumb {
+  width: 36px;
+  height: 36px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.adminItemNameCell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.adminItemActions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.adminBtnDanger {
+  color: #dc2626;
+  border: 1.5px solid #dc2626;
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 5px 10px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.adminBtnDanger:hover {
+  background: #dc2626;
+  color: #fff;
+}
+
+/* Larger modal for the item form */
+.modalBoxLg {
+  max-width: 700px;
+  max-height: 88vh;
+  overflow-y: auto;
+}
+
+.adminItemFormGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 16px;
+}
+
+.adminItemFormFull {
+  grid-column: 1 / -1;
+}
+
+.modalTextarea {
+  resize: vertical;
+  min-height: 72px;
+  font-family: inherit;
+}
+
+/* Edit form layout */
+.adminEditItemForm {
+  padding: 20px 24px;
+}
+
+.adminEditItemHeader {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.adminEditItemName {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.adminEditSectionLabel {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin: 14px 0 8px;
+}
+
+.adminEditGrid {
+  display: grid;
+  gap: 0 16px;
+}
+
+.adminEditGridFull {
+  grid-template-columns: 1fr;
+}
+
+.adminEditGrid2 {
+  grid-template-columns: 1fr 1fr;
+}
+
+.adminEditGrid4 {
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+
+.adminEditSelect {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font: inherit;
+  font-size: 13px;
+  color: var(--text);
+  background: var(--surface);
+  transition: border-color 0.15s;
+  height: 36px;
+  box-sizing: border-box;
+}
+
+.adminEditSelect:focus {
+  outline: none;
+  border-color: #000;
+}
+
+.adminEditActions {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
