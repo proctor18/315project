@@ -55,7 +55,11 @@ RENTIFY allows students to post items for rent and request rentals from other st
 - Node.js v18 or higher
 - npm
 
-### 1. Install dependencies
+### Make sure to be inside the main folder
+```bash
+cd 315project-main
+```
+### 1. Install dependencies 
 
 ```bash
 npm install
