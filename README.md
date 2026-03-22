@@ -1,6 +1,6 @@
 # RENTIFY — Student Rental Management System
 
-A web application for students to list, browse, and rent items from each other. Built with Next.js (App Router), Supabase, and Tailwind CSS.
+A web application for students to list, browse, and rent items from each other.
 
 ---
 
@@ -45,15 +45,6 @@ RENTIFY allows students to post items for rent and request rentals from other st
 | `/admin/rentals` | Admin: manage all rentals |
 | `/admin/users` | Admin: manage users |
 | `/admin/locations` | Admin: manage locations |
-
----
-
-## Tech Stack
-
-- **Framework:** Next.js 16 (App Router)
-- **Database & Auth:** Supabase (PostgreSQL + Row Level Security)
-- **Styling:** Tailwind CSS v4
-- **Language:** JavaScript / TypeScript
 
 ---
 
