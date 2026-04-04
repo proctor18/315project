@@ -39,7 +39,8 @@ export default function RentPage() {
   const [selectedCardId, setSelectedCardId] = useState("");
 
   useEffect(() => {
-    if (!id || !user) return;
+    if (!id) return;
+    if (!user) { router.push("/login"); return; }
     Promise.all([
       supabase.from("items").select("*").eq("id", id).maybeSingle(),
       supabase.from("locations").select("*").eq("status", "active"),
@@ -260,8 +261,8 @@ export default function RentPage() {
           </div>
         </div>
       </div>
-      
+
     </div>
-    
+
   );
 }

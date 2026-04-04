@@ -296,10 +296,20 @@ export default function ItemDetailPage() {
             {!isOwner ? (
               <div className={`actions actionsMt`}>
                 <Link
-                  href={item.item_status === "available" ? `/items/${item.id}/rent` : "#"}
+                  href={
+                    item.item_status !== "available"
+                      ? "#"
+                      : !user
+                        ? "/login"
+                        : `/items/${item.id}/rent`
+                  }
                   className={`btn btnPrimary btnLg rentBtnFull${item.item_status !== "available" ? " rentBtnUnavailable" : ""}`}
                 >
-                  {item.item_status === "available" ? "Request to Rent" : "Currently Unavailable"}
+                  {item.item_status !== "available"
+                    ? "Currently Unavailable"
+                    : !user
+                      ? "Log In to Request Rental"
+                      : "Request to Rent"}
                 </Link>
               </div>
             ) : (
@@ -322,7 +332,7 @@ export default function ItemDetailPage() {
           </div>
         </div>
       </div>
-      
+
     </div>
   );
 }
