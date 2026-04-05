@@ -212,7 +212,7 @@ export default function ProfilePage() {
 
               <div className="actions">
                 <button type="submit" className="btn btnPrimary" disabled={saving}>
-                  {saving ? "Saving..." : "Edit Profile"}
+                  {saving ? "Saving..." : "Update profile"}
                 </button>
               </div>
 

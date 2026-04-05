@@ -19,12 +19,18 @@ export function AuthProvider({ children }) {
 
   async function fetchProfile(userId) {
     if (!userId) { setProfile(null); return; }
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("profiles")
       .select("*")
       .eq("id", userId)
       .maybeSingle();
+    if (error) {
+      console.error(error);
+      setProfile(null);
+      return;
+    }
     setProfile(data ?? null);
+
   }
 
   useEffect(() => {
