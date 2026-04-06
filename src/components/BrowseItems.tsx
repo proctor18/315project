@@ -67,7 +67,6 @@ export default function BrowsePage() {
   return (
     <div>
       <div className="container top-margin">
-
         {/* Search result label */}
         {searchQuery && (
           <p className="searchResultLabel">

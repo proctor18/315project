@@ -5,7 +5,6 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import BrowseItems from "@/components/BrowseItems";
-import ItemCard from "@/components/ItemCard";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabaseClient";

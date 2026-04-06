@@ -1,7 +1,6 @@
 # RENTIFY — Student Rental Management System
 
 A web application for students to list, browse, and rent items from each other.
-
 ---
 
 ## Team
@@ -18,8 +17,15 @@ Team Members:
 
 ## Project Overview
 
-RENTIFY allows students to post items for rent and request rentals from other students. Admins can manage listings, users, locations, and rental approvals. The platform supports messaging between users and tracks rental history.
+RENTIFY is a platform that allows students to list items for rent and request rentals from other users. Administrators can manage listings, users, locations, and rental approvals. The platform also includes messaging features and tracks rental history.
 
+The primary target audience is university students who need items for short-term use, such as for projects, assignments, or other academic purposes. RENTIFY provides an affordable alternative to purchasing expensive items that may only be needed temporarily, helping students avoid unnecessary long-term ownership.
+
+The platform is also open to non-student users, who can list items that may be useful to students.
+
+# Main Goal 
+
+The main goal of this project is to demonstrate a platform that enables students to temporarily access items during their studies without the need to purchase them at full price. Additionally, it allows users to rent out items they no longer need, creating an opportunity to earn extra income.
 ---
 
 ## Pages / Sitemap
@@ -97,3 +103,37 @@ You can register a new account from the `/login` page, or use one of the followi
 | Student | mc@macewan.ca | 11111111 |
 
 ---
+## Website Features
+- Browse items by location or category
+- Search for specific items
+- List items for rent or request items from other users
+- Edit profile information, including profile image, address, and phone number
+- Add and manage multiple payment methods
+- View personal listings (active or currently rented out)
+- View and manage rental requests from other users
+- Rate sellers after completing a rental
+- Send and receive messages through the platform
+---
+
+## Tech Stack
+Frontend: React / HTML / CSS
+Backend/Database: Supabase
+---
+
+## User Roles
+Student/User: Browse items, request rentals, message others
+Admin: Manage users, listings, locations, and approvals
+---
+
+## User Guide
+1. Register or log in
+2. Browse available items
+3. Request a rental
+4. Wait for approval of the rental from the seller
+5. Seller approves or denies the rental request
+---
+
+## Limitations
+- No payment integration implemented 
+- Not optimized for mobile devices
+- No notification system

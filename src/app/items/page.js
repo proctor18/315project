@@ -4,7 +4,7 @@ import BrowseItems from "@/components/BrowseItems";
 export default function BrowsePage() {
   return (
     <div>
-        <Header />
+      <Header />
       <BrowseItems />
     </div>
   );
