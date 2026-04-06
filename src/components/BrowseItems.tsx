@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import ItemCard from "@/components/ItemCard";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabaseClient";
@@ -8,8 +9,8 @@ import { supabase } from "@/lib/supabaseClient";
 const CATEGORIES = [
   { id: "", label: "All" },
   { id: "C-TXTBK", label: "Textbooks" },
-  { id: "C-ELEC",  label: "Electronics" },
-  { id: "C-LAB",   label: "Lab Equipment" },
+  { id: "C-ELEC", label: "Electronics" },
+  { id: "C-LAB", label: "Lab Equipment" },
 ];
 
 type Item = {
@@ -31,13 +32,13 @@ type Item = {
 
 export default function BrowsePage() {
   const { user, loading } = useAuth();
-  
+  const searchParams = useSearchParams();
+  const searchQuery = searchParams.get("q")?.trim() ?? "";
+
   const [items, setItems] = useState<Item[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [categoryFilter, setCategoryFilter] = useState("");
-
-  
 
   useEffect(() => {
     let cancelled = false;
@@ -47,6 +48,7 @@ export default function BrowsePage() {
       .order("created_at", { ascending: false });
 
     if (categoryFilter) query = (query as any).eq("category_id", categoryFilter);
+    if (searchQuery) query = (query as any).ilike("name", `%${searchQuery}%`);
 
     query.then(({ data, error }: any) => {
       if (cancelled) return;
@@ -56,7 +58,7 @@ export default function BrowsePage() {
     });
 
     return () => { cancelled = true; };
-  }, [categoryFilter]);
+  }, [categoryFilter, searchQuery]);
 
   const visibleItems = user
     ? items.filter((item) => item.owner_id !== (user as any).id)
@@ -65,7 +67,15 @@ export default function BrowsePage() {
   return (
     <div>
       <div className="container top-margin">
-           {/* Category filter */}
+
+        {/* Search result label */}
+        {searchQuery && (
+          <p className="searchResultLabel">
+            Showing results for <strong>&ldquo;{searchQuery}&rdquo;</strong> &mdash; {visibleItems.length} item{visibleItems.length !== 1 ? "s" : ""} found
+          </p>
+        )}
+
+        {/* Category filter */}
         <div className="filterPills">
           {CATEGORIES.map((c) => (
             <button
@@ -87,7 +97,11 @@ export default function BrowsePage() {
           </div>
         ) : visibleItems.length === 0 ? (
           <div className="centerNotice">
-            {user ? "No items from other students yet." : "No items have been posted yet."}
+            {searchQuery
+              ? `No items found for "${searchQuery}".`
+              : user
+                ? "No items from other students yet."
+                : "No items have been posted yet."}
           </div>
         ) : (
           <div className="cardsGrid">
