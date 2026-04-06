@@ -79,8 +79,8 @@ export default function RentalReceiptPage() {
               Waiting for seller response... <span className="receiptPollingDot">●</span>
             </p>
             <div className="actions receiptActionsCenter">
-              <Link href="/messages" className="btn btnGhost">Message Seller</Link>
-              <Link href="/my-rentals" className="btn btnGhost">My Rentals</Link>
+              <Link href="/messages" className="btn btnPrimary">Message Seller</Link>
+              <Link href="/my-rentals" className="btn btnPrimary">My Rentals</Link>
             </div>
           </div>
         </div>

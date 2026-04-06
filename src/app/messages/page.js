@@ -117,10 +117,10 @@ export default function MessagesPage() {
   const activeThreadMessages =
     user && activeThreadUserId
       ? messages.filter((row) => {
-          const pairA = row.sender_id === user.id && row.recipient_id === activeThreadUserId;
-          const pairB = row.sender_id === activeThreadUserId && row.recipient_id === user.id;
-          return pairA || pairB;
-        })
+        const pairA = row.sender_id === user.id && row.recipient_id === activeThreadUserId;
+        const pairB = row.sender_id === activeThreadUserId && row.recipient_id === user.id;
+        return pairA || pairB;
+      })
       : [];
 
   const searchQuery = searchText.trim().toLowerCase();
@@ -136,22 +136,22 @@ export default function MessagesPage() {
 
   const visibleConversations = searchQuery
     ? conversations.filter((conversation) => {
-        const primary = labelForUserId(conversation.otherUserId).toLowerCase();
-        const secondary = secondaryForUserId(conversation.otherUserId).toLowerCase();
-        const preview = String(conversation.last.body ?? "").toLowerCase();
-        return primary.includes(searchQuery) || secondary.includes(searchQuery) || preview.includes(searchQuery);
-      })
+      const primary = labelForUserId(conversation.otherUserId).toLowerCase();
+      const secondary = secondaryForUserId(conversation.otherUserId).toLowerCase();
+      const preview = String(conversation.last.body ?? "").toLowerCase();
+      return primary.includes(searchQuery) || secondary.includes(searchQuery) || preview.includes(searchQuery);
+    })
     : conversations;
 
   const conversationUserIds = new Set(conversations.map((c) => c.otherUserId));
   const visibleNewUsers = searchQuery
     ? profiles.filter((profile) => {
-        if (conversationUserIds.has(profile.id)) return false;
-        const primary = userLabel(profile, "", profile.id).toLowerCase();
-        const secondary = fullNameFromProfile(profile).toLowerCase();
-        const email = String(profile.email ?? "").toLowerCase();
-        return primary.includes(searchQuery) || secondary.includes(searchQuery) || email.includes(searchQuery);
-      })
+      if (conversationUserIds.has(profile.id)) return false;
+      const primary = userLabel(profile, "", profile.id).toLowerCase();
+      const secondary = fullNameFromProfile(profile).toLowerCase();
+      const email = String(profile.email ?? "").toLowerCase();
+      return primary.includes(searchQuery) || secondary.includes(searchQuery) || email.includes(searchQuery);
+    })
     : [];
 
   function openThread(targetUserId) {
@@ -213,147 +213,148 @@ export default function MessagesPage() {
       <Header />
       <div className="container">
 
-      {!inThread ? (
-        <section className="pageHead">
-          <div>
-            <h1 className="pageTitle">Messages</h1>
-            <p className="pageSubtitle">Connect with other students.</p>
-          </div>
-          {user ? (
-            <button type="button" className="btn btnGhost" onClick={() => void refreshData()} disabled={refreshing}>
-              {refreshing ? "Refreshing..." : "Refresh"}
-            </button>
-          ) : null}
-        </section>
-      ) : null}
-
-      {loading ? (
-        <div className="centerNotice">Loading messages...</div>
-      ) : !user ? (
-        <div className="centerNotice">
-          Please <Link href="/login">log in</Link> to view messages.
-        </div>
-      ) : !isLoaded ? (
-        <div className="centerNotice">Loading conversations...</div>
-      ) : inThread ? (
-        <section className="threadCard">
-          <div className="threadHeader">
+        {!inThread ? (
+          <section className="pageHead">
             <div>
-              <h2 className="threadHeaderName">{labelForUserId(activeThreadUserId)}</h2>
-              <p className="chatPreview threadHeaderSub">
-                {secondaryForUserId(activeThreadUserId)}
-              </p>
+              <h1 className="pageTitle">Messages</h1>
+              <p className="pageSubtitle">Connect with other students.</p>
             </div>
-            <div className="actions threadActionsRow">
-              <button type="button" className="btn btnDanger" onClick={deleteConversation} disabled={deleting}>
-                {deleting ? "Deleting..." : "Delete"}
+            {user ? (
+              <button type="button" className="btn btnGhost" onClick={() => void refreshData()} disabled={refreshing}>
+                {refreshing ? "Refreshing..." : "Refresh"}
               </button>
-              <button type="button" className="btn btnGhost" onClick={() => setMode("list")}>
-                Back
-              </button>
-            </div>
+            ) : null}
+          </section>
+        ) : null}
+
+        {loading ? (
+          <div className="centerNotice">Loading messages...</div>
+        ) : !user ? (
+          <div className="centerNotice">
+            Please <Link href="/login">log in</Link> to view messages.
           </div>
-
-          <div className="threadMessages">
-            {activeThreadMessages.length === 0 ? (
-              <div className="centerNotice">No messages yet.</div>
-            ) : (
-              activeThreadMessages.map((row) => {
-                const mine = row.sender_id === user.id;
-                return (
-                  <div key={row.id} className={`bubbleWrap ${mine ? "bubbleWrapMine" : ""}`}>
-                    <div className={`bubble ${mine ? "bubbleMine" : "bubbleOther"}`}>
-                      {row.body}
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
-
-          <form className="composer" onSubmit={sendMessage}>
-            <input
-              placeholder="Type a message"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              disabled={sending || deleting}
-              required
-            />
-            <button type="submit" className="btn btnPrimary" disabled={sending || deleting}>
-              {sending ? "Sending..." : "Send"}
-            </button>
-          </form>
-        </section>
-      ) : (
-        <section className="chatList">
-          {requestedUserId && requestedUserId !== user.id && !profilesById[requestedUserId] ? (
-            <div className="centerNotice chatUserNotFound">
-              User not found yet. Refresh after they complete signup/profile setup.
-            </div>
-          ) : null}
-
-          <div className="field">
-            <input
-              placeholder="Search conversations or students"
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-            />
-          </div>
-
-          {visibleConversations.length === 0 && visibleNewUsers.length === 0 ? (
-            searchQuery ? (
-              <div className="centerNotice">No conversations or students found.</div>
-            ) : (
-              <div className="centerNotice">
-                No messages yet. Use search to start a conversation.
+        ) : !isLoaded ? (
+          <div className="centerNotice">Loading conversations...</div>
+        ) : inThread ? (
+          <section className="threadCard">
+            <div className="threadHeader">
+              <div>
+                <h2 className="threadHeaderName">{labelForUserId(activeThreadUserId)}</h2>
+                <p className="chatPreview threadHeaderSub">
+                  {secondaryForUserId(activeThreadUserId)}
+                </p>
               </div>
-            )
-          ) : (
-            <>
-              {visibleConversations.map((conversation) => (
-                <button
-                  key={conversation.otherUserId}
-                  type="button"
-                  className={`chatRow ${activeUserId === conversation.otherUserId ? "chatRowActive" : ""}`}
-                  onClick={() => openThread(conversation.otherUserId)}
-                >
-                  <div className="chatTop">
-                    <p className="chatName">{labelForUserId(conversation.otherUserId)}</p>
-                  </div>
-                  <p className="chatPreview">{conversation.last.body}</p>
+              <div className="actions threadActionsRow">
+                <button type="button" className="btn btnGhost" onClick={() => setMode("list")}>
+                  Back
                 </button>
-              ))}
+                <button type="button" className="btn btnDanger" onClick={deleteConversation} disabled={deleting}>
+                  {deleting ? "Deleting..." : "Delete"}
+                </button>
 
-              {visibleNewUsers.length > 0 ? (
-                <>
-                  <p className="label chatStartLabel">Start a conversation</p>
-                  {visibleNewUsers.map((profile) => (
-                    <button
-                      key={profile.id}
-                      type="button"
-                      className="chatRow"
-                      onClick={() => openThread(profile.id)}
-                    >
-                      <div className="chatTop">
-                        <p className="chatName">{userLabel(profile, "", profile.id)}</p>
+              </div>
+            </div>
+
+            <div className="threadMessages">
+              {activeThreadMessages.length === 0 ? (
+                <div className="centerNotice">No messages yet.</div>
+              ) : (
+                activeThreadMessages.map((row) => {
+                  const mine = row.sender_id === user.id;
+                  return (
+                    <div key={row.id} className={`bubbleWrap ${mine ? "bubbleWrapMine" : ""}`}>
+                      <div className={`bubble ${mine ? "bubbleMine" : "bubbleOther"}`}>
+                        {row.body}
                       </div>
-                      <p className="chatPreview">
-                        {fullNameFromProfile(profile) || profile.email || profile.id}
-                      </p>
-                    </button>
-                  ))}
-                </>
-              ) : null}
-            </>
-          )}
-        </section>
-      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
 
-      {message ? (
-        <p className={`messageText ${message.toLowerCase().includes("failed") ? "errorText" : ""}`}>
-          {message}
-        </p>
-      ) : null}
+            <form className="composer" onSubmit={sendMessage}>
+              <input
+                placeholder="Type a message"
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                disabled={sending || deleting}
+                required
+              />
+              <button type="submit" className="btn btnPrimary" disabled={sending || deleting}>
+                {sending ? "Sending..." : "Send"}
+              </button>
+            </form>
+          </section>
+        ) : (
+          <section className="chatList">
+            {requestedUserId && requestedUserId !== user.id && !profilesById[requestedUserId] ? (
+              <div className="centerNotice chatUserNotFound">
+                User not found yet. Refresh after they complete signup/profile setup.
+              </div>
+            ) : null}
+
+            <div className="field">
+              <input
+                placeholder="Search conversations or students"
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+              />
+            </div>
+
+            {visibleConversations.length === 0 && visibleNewUsers.length === 0 ? (
+              searchQuery ? (
+                <div className="centerNotice">No conversations or students found.</div>
+              ) : (
+                <div className="centerNotice">
+                  No messages yet. Use search to start a conversation.
+                </div>
+              )
+            ) : (
+              <>
+                {visibleConversations.map((conversation) => (
+                  <button
+                    key={conversation.otherUserId}
+                    type="button"
+                    className={`chatRow ${activeUserId === conversation.otherUserId ? "chatRowActive" : ""}`}
+                    onClick={() => openThread(conversation.otherUserId)}
+                  >
+                    <div className="chatTop">
+                      <p className="chatName">{labelForUserId(conversation.otherUserId)}</p>
+                    </div>
+                    <p className="chatPreview">{conversation.last.body}</p>
+                  </button>
+                ))}
+
+                {visibleNewUsers.length > 0 ? (
+                  <>
+                    <p className="label chatStartLabel">Start a conversation</p>
+                    {visibleNewUsers.map((profile) => (
+                      <button
+                        key={profile.id}
+                        type="button"
+                        className="chatRow"
+                        onClick={() => openThread(profile.id)}
+                      >
+                        <div className="chatTop">
+                          <p className="chatName">{userLabel(profile, "", profile.id)}</p>
+                        </div>
+                        <p className="chatPreview">
+                          {fullNameFromProfile(profile) || profile.email || profile.id}
+                        </p>
+                      </button>
+                    ))}
+                  </>
+                ) : null}
+              </>
+            )}
+          </section>
+        )}
+
+        {message ? (
+          <p className={`messageText ${message.toLowerCase().includes("failed") ? "errorText" : ""}`}>
+            {message}
+          </p>
+        ) : null}
       </div>
     </div>
   );
