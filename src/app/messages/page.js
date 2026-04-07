@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import Header from "@/components/Header";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabaseClient";
@@ -26,10 +25,16 @@ async function fetchMessagesForUser(userId) {
 }
 
 export default function MessagesPage() {
-  const searchParams = useSearchParams();
   const { user, loading } = useAuth();
+  const [requestedUserId, setRequestedUserId] = useState("");
 
-  const requestedUserId = searchParams.get("u") || "";
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      setRequestedUserId(params.get("u") || "");
+    }
+  }, []);
+
 
   const [profiles, setProfiles] = useState([]);
   const [messages, setMessages] = useState([]);
